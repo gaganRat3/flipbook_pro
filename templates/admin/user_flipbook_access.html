@@ -1,0 +1,112 @@
+{% extends "admin/base_site.html" %}
+{% load user_dict %}
+
+{% block extrahead %}
+<style>
+    .flipbook-scroll-container {
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid #bbb;
+        padding: 10px;
+        border-radius: 4px;
+        background-color: #fff;
+        color: #111;
+    }
+    .flipbook-scroll-container label {
+        display: block;
+        margin: 6px 0;
+        padding: 4px;
+        cursor: pointer;
+        border-radius: 3px;
+        transition: background-color 0.2s;
+        color: #111;
+        background: none;
+    }
+    .flipbook-scroll-container label:hover {
+        background-color: #f0f0f0;
+    }
+    .flipbook-scroll-container input[type="checkbox"] {
+        margin-right: 6px;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>User FlipBook Access Management</h1>
+<form method="post">{% csrf_token %}
+<table class="adminlist">
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>FlipBooks (checkboxes)</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for user in users %}
+        <tr>
+            <td><strong>{{ user.username }}</strong><br><small>{{ user.email }}</small></td>
+            <td>
+                <div class="flipbook-scroll-container">
+                    {% for flipbook in flipbooks %}
+                        <label>
+                            <input type="checkbox" name="flipbooks_{{ user.id }}" value="{{ flipbook.id }}" {% if flipbook.id in user_flipbook_ids|dict_get:user.id %}checked{% endif %}>
+                            {{ flipbook.title }}
+                        </label>
+                    {% endfor %}
+                </div>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<input type="submit" value="Save Changes" class="default">
+
+<style>
+    .pagination {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        margin-top: 20px;
+    }
+    .pagination a, .pagination span.page-current {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 4px;
+        background: #222;
+        color: #fff;
+        text-decoration: none;
+        font-weight: 500;
+        border: 1px solid #444;
+        transition: background 0.2s, color 0.2s;
+    }
+    .pagination a:hover {
+        background: #007acc;
+        color: #fff;
+        border-color: #007acc;
+    }
+    .pagination span.page-current {
+        background: #fff;
+        color: #222;
+        border: 2px solid #007acc;
+        font-weight: bold;
+        cursor: default;
+    }
+</style>
+<div class="pagination">
+    {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}">&laquo; Prev</a>
+    {% endif %}
+    {% for num in paginator.page_range %}
+        {% if page_obj.number == num %}
+            <span class="page-current">{{ num }}</span>
+        {% else %}
+            <a href="?page={{ num }}">{{ num }}</a>
+        {% endif %}
+    {% endfor %}
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">Next &raquo;</a>
+    {% endif %}
+</div>
+</form>
+{% endblock %}
