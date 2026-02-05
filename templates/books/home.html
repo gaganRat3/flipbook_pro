@@ -998,51 +998,79 @@
         margin-bottom: 40px;
       "
     >
-      <div
-        style="
-          display: flex;
-          align-items: center;
-          gap: 18px;
-          margin-bottom: 24px;
-        "
-      >
-        <span style="font-size: 28px; color: #fa8112"
-          ><i class="fas fa-sliders-h"></i
-        ></span>
-        <h2
+      <style>
+        /* Custom containers for filter sections */
+        .filter-dashboard-container {
+          background: #ffebc6;
+          border-radius: 18px;
+          box-shadow: 0 6px 32px rgba(250, 129, 18, 0.08);
+          padding: 32px 28px 24px 28px;
+          margin-bottom: 40px;
+        }
+        .sammelan-events-container {
+          background: #aee1f8;
+          border-radius: 16px;
+          box-shadow: 0 2px 16px rgba(46, 134, 171, 0.08);
+          padding: 24px 20px;
+          margin-bottom: 32px;
+        }
+        .categories-container {
+          background: #dac9fc;
+          border-radius: 16px;
+          box-shadow: 0 2px 16px rgba(142, 68, 173, 0.08);
+          padding: 24px 20px;
+          margin-bottom: 32px;
+        }
+      </style>
+      <!-- Filter Dashboard Container -->
+      <div class="filter-dashboard-container">
+        <div
           style="
-            font-size: 22px;
-            font-weight: 700;
-            color: #222;
-            margin: 0;
-            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 24px;
           "
         >
-          Filter Dashboard
-        </h2>
-      </div>
+          <span style="font-size: 28px; color: #fa8112"
+            ><i class="fas fa-sliders-h"></i
+          ></span>
+          <h2
+            style="
+              font-size: 22px;
+              font-weight: 700;
+              color: #222;
+              margin: 0;
+              letter-spacing: 0.5px;
+            "
+          >
+            Filter Dashboard
+          </h2>
+        </div>
 
-      <!-- Quick Access Buttons -->
-      <div class="filter-button-group" style="margin-bottom: 24px">
-        <label><i class="fas fa-bolt"></i> Quick Access</label>
-        <div class="filter-buttons-container">
-          <a
-            href="{% url 'home' %}"
-            class="filter-btn {% if not selected_event and not my_books_filter and not show_sammelan %}active{% endif %}"
-            style="border-color: #fa8112"
-            ><i class="fas fa-list"></i> All Books</a
-          >
-          <a
-            href="{% url 'home' %}?my_books=true"
-            class="filter-btn {% if my_books_filter == 'true' %}active{% endif %}"
-            style="border-color: #dbdbdb; color: #ff7272"
-            ><i class="fas fa-check-circle"></i> My FlipBooks</a
-          >
+        <!-- Quick Access Buttons -->
+        <div class="filter-button-group" style="margin-bottom: 24px">
+          <label><i class="fas fa-bolt"></i> Quick Access</label>
+          <div class="filter-buttons-container">
+            <a
+              href="{% url 'home' %}"
+              class="filter-btn {% if not selected_event and not my_books_filter and not show_sammelan %}active{% endif %}"
+              style="border-color: #fa8112"
+              ><i class="fas fa-list"></i> All Books</a
+            >
+            <a
+              href="{% url 'home' %}?my_books=true"
+              class="filter-btn {% if my_books_filter == 'true' %}active{% endif %}"
+              style="border-color: #dbdbdb; color: #ff7272"
+              ><i class="fas fa-check-circle"></i> My FlipBooks</a
+            >
+          </div>
         </div>
       </div>
 
-      <!-- Sammelan Events Buttons -->
-      <div class="filter-button-group" style="margin-bottom: 24px">
+    <!-- Sammelan Events Buttons -->
+    <div class="sammelan-events-container">
+      <div class="filter-button-group" style="margin-bottom: 0">
         <label><i class="fas fa-calendar"></i> Sammelan Events</label>
         <br>
         <div class="sammelan-events-grid">
@@ -1054,14 +1082,9 @@
               onclick="toggleEventSubcategories(event, '{{ event.id }}')"
               style="width: 100%; border-color: {{ event.color }}; color: {{ event.color }};"
             >
-              <i class=""></i> {{ event.name }}
+              <i class="{{ event.icon }}"></i> {{ event.name }}
             </button>
             <div class="category-subcategories" id="event-subcat-{{ event.id }}">
-              {% comment %} <a
-                href="{% url 'home' %}?event={{ event.id }}"
-                class="filter-btn {% if selected_event == event.id and not selected_mela_type %}active{% endif %}"
-                ><i class="fas fa-inbox"></i> All Melas</a
-              > {% endcomment %}
               <a
                 href="{% url 'home' %}?event={{ event.id }}&mela_type=boys"
                 class="filter-btn filter-btn-boys {% if selected_event == event.id and selected_mela_type == 'boys' %}active{% endif %}"
@@ -1077,11 +1100,10 @@
           {% endfor %}
         </div>
       </div>
+    </div>
 
-
-      <!-- Mela Type Filter removed - now part of each event's subcategories -->
-
-      <!-- Categories Buttons with Subcategories -->
+    <!-- Categories Buttons with Subcategories -->
+    <div class="categories-container">
       <div class="filter-button-group">
         <label><i class="fas fa-tag"></i> Categories</label>
         <br>
@@ -1097,11 +1119,6 @@
               <i class="fas fa-bookmark"></i> {{ category.name }}
             </button>
             <div class="category-subcategories" id="subcat-{{ category.id }}">
-              {% comment %} <a
-                href="{% url 'home' %}?category={{ category.id }}"
-                class="filter-btn filter-btn-category {% if selected_category == category.id and not selected_mela_type %}active{% endif %}"
-                ><i class="fas fa-inbox"></i> All Melas</a
-              > {% endcomment %}
               <a
                 href="{% url 'home' %}?category={{ category.id }}&mela_type=boys"
                 class="filter-btn filter-btn-boys {% if selected_category == category.id and selected_mela_type == 'boys' %}active{% endif %}"
@@ -1120,76 +1137,6 @@
     </div>
 
     {% if books %}
-    <!-- Books Display -->
-    {% if selected_event %}
-    <!-- Single Event View -->
-    <div class="books-grid">
-      {% for book in books %}
-      <div class="book-card">
-        {% if book.id in accessible_ids %}
-        <a href="{% url 'flipbook' book.id %}" class="book-link">
-          <div class="book-thumbnail">
-            <span class="book-status-badge accessible"
-              ><i class="fas fa-check-circle"></i> Accessible</span
-            >
-            {% if book.thumbnail %}
-            <img src="{{ book.thumbnail.url }}" alt="{{ book.title }}" />
-            {% else %}
-            <div class="book-placeholder"><i class="fas fa-book-open"></i></div>
-            {% endif %}
-            <div class="book-overlay">
-              <i class="fas fa-eye"></i><span>View Book</span>
-            </div>
-          </div>
-          <div class="book-info">
-            <h3>{{ book.title }}</h3>
-            {% if book.description %}
-            <p>{{ book.description|truncatewords:15 }}</p>
-            {% endif %}
-            <div class="book-meta">
-              <span><i class="fas fa-file-pdf"></i> {{ book.total_pages }} pages</span>
-            </div>
-          </div>
-        </a>
-        {% else %}
-        <div class="book-link book-locked">
-          <div class="book-thumbnail">
-            <span class="book-status-badge locked"
-              ><i class="fas fa-lock"></i> Locked</span
-            >
-            {% if book.thumbnail %}
-            <img src="{{ book.thumbnail.url }}" alt="{{ book.title }}" />
-            {% else %}
-            <div class="book-placeholder"><i class="fas fa-book-open"></i></div>
-            {% endif %}
-            <div class="book-overlay book-overlay-locked">
-              <div class="lock-content">
-                <i class="fas fa-lock"></i>
-                <span>Locked</span>
-                <button
-                  class="btn-unlock"
-                  onclick="openUnlockModal({{ book.id }}, '{{ book.title }}')"
-                >
-                  <i class="fas fa-credit-card"></i> Pay to Unlock
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="book-info">
-            <h3>{{ book.title }}</h3>
-            {% if book.description %}
-            <p>{{ book.description|truncatewords:15 }}</p>
-            {% endif %}
-            <div class="book-meta">
-              <span><i class="fas fa-file-pdf"></i> {{ book.total_pages }} pages</span>
-            </div>
-          </div>
-        </div>
-        {% endif %}
-      </div>
-      {% endfor %}
-    </div>
-    {% else %}
     <!-- All Events View -->
     {% regroup books by event as books_by_event %}
     {% for grouper in books_by_event %}
@@ -1291,7 +1238,6 @@
       </div>
     </div>
     {% endfor %}
-    {% endif %}
     {% else %}
     <div class="empty-state">
       <i class="fas fa-inbox"></i>
