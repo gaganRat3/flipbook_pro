@@ -11,7 +11,7 @@ class Event(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     icon = models.CharField(max_length=50, default='fa-calendar', help_text="Font Awesome icon class")
-    color = models.CharField(max_length=7, default='#FA8112', help_text="Hex color code")
+    color = models.CharField(max_length=7, default='#2E86AB', help_text="Hex color code")
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

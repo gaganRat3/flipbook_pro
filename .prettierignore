@@ -1,0 +1,3 @@
+# Exclude Django templates from Prettier formatting
+templates/
+*.html

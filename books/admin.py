@@ -248,16 +248,37 @@ def user_flipbook_access_view(request):
         user_flipbook_ids[user.id] = set(FlipBookAccess.objects.filter(user=user).values_list('flipbook_id', flat=True))
 
     if request.method == 'POST':
-        # For POST, update all users (not just current page)
-        all_users = User.objects.filter(is_staff=False, is_superuser=False)
-        for user in all_users:
-            selected = set(map(int, request.POST.getlist(f'flipbooks_{user.id}')))
-            current = set(FlipBookAccess.objects.filter(user=user).values_list('flipbook_id', flat=True))
-            for fb_id in selected - current:
-                FlipBookAccess.objects.create(user=user, flipbook_id=fb_id)
-            for fb_id in current - selected:
-                FlipBookAccess.objects.filter(user=user, flipbook_id=fb_id).delete()
-        messages.success(request, "FlipBook access updated for all users.")
+        # For POST, update only users on current page to avoid data loss
+        try:
+            for user in users:
+                selected = set()
+                flipbook_ids = request.POST.getlist(f'flipbooks_{user.id}')
+                for fb_id in flipbook_ids:
+                    try:
+                        selected.add(int(fb_id))
+                    except (ValueError, TypeError):
+                        continue
+                
+                current = set(FlipBookAccess.objects.filter(user=user).values_list('flipbook_id', flat=True))
+                
+                # Add new access
+                for fb_id in selected - current:
+                    try:
+                        FlipBookAccess.objects.get_or_create(user=user, flipbook_id=fb_id)
+                    except Exception as e:
+                        print(f"Error creating access for user {user.id}, flipbook {fb_id}: {e}")
+                
+                # Remove access
+                for fb_id in current - selected:
+                    try:
+                        FlipBookAccess.objects.filter(user=user, flipbook_id=fb_id).delete()
+                    except Exception as e:
+                        print(f"Error deleting access for user {user.id}, flipbook {fb_id}: {e}")
+            
+            messages.success(request, f"✅ FlipBook access updated successfully for {len(users)} user(s).")
+        except Exception as e:
+            messages.error(request, f"❌ Error updating access: {str(e)}")
+        
         return redirect(request.path)
 
     context = {

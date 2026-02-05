@@ -29,12 +29,57 @@
         margin-right: 6px;
         cursor: pointer;
     }
+    
+    .success-message, .error-message {
+        padding: 12px 15px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+        font-weight: 500;
+    }
+    
+    .success-message {
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+    }
+    
+    .error-message {
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+    }
+    
+    .info-box {
+        background-color: #d1ecf1;
+        border: 1px solid #bee5eb;
+        color: #0c5460;
+        padding: 12px 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+    }
+    
+    .submit-section {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #ddd;
+    }
+    
+    .submit-section input[type="submit"] {
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: 600;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <h1>User FlipBook Access Management</h1>
-<form method="post">{% csrf_token %}
+
+<div class="info-box">
+    <strong>ℹ️ Instructions:</strong> Check the flipbooks you want to grant access to each user, then click "Save Changes" to update permissions.
+</div>
+
+<form method="post" id="flipbook-form">{% csrf_token %}
 <table class="adminlist">
     <thead>
         <tr>
@@ -48,19 +93,30 @@
             <td><strong>{{ user.username }}</strong><br><small>{{ user.email }}</small></td>
             <td>
                 <div class="flipbook-scroll-container">
-                    {% for flipbook in flipbooks %}
-                        <label>
-                            <input type="checkbox" name="flipbooks_{{ user.id }}" value="{{ flipbook.id }}" {% if flipbook.id in user_flipbook_ids|dict_get:user.id %}checked{% endif %}>
-                            {{ flipbook.title }}
-                        </label>
-                    {% endfor %}
+                    {% if flipbooks %}
+                        {% for flipbook in flipbooks %}
+                            <label>
+                                <input type="checkbox" 
+                                       name="flipbooks_{{ user.id }}" 
+                                       value="{{ flipbook.id }}" 
+                                       {% if flipbook.id in user_flipbook_ids|dict_get:user.id %}checked{% endif %}>
+                                {{ flipbook.title }}
+                            </label>
+                        {% endfor %}
+                    {% else %}
+                        <p style="color: #999;">No flipbooks available</p>
+                    {% endif %}
                 </div>
             </td>
         </tr>
     {% endfor %}
     </tbody>
 </table>
-<input type="submit" value="Save Changes" class="default">
+
+<div class="submit-section">
+    <input type="submit" value="💾 Save Changes" class="default">
+</div>
+</form>
 
 <style>
     .pagination {
@@ -108,5 +164,16 @@
         <a href="?page={{ page_obj.next_page_number }}">Next &raquo;</a>
     {% endif %}
 </div>
-</form>
+
+<script>
+document.getElementById('flipbook-form').addEventListener('submit', function(e) {
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+    if (confirm(`Are you sure? This will update access for ${checkboxes.length} selected item(s).`)) {
+        this.submit();
+    } else {
+        e.preventDefault();
+    }
+});
+</script>
 {% endblock %}
+

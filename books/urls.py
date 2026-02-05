@@ -8,4 +8,5 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('book/<int:book_id>/', views.flipbook_view, name='flipbook'),
     path('unlock-request/', views.unlock_request_view, name='unlock_request'),
+    path('debug/access/', views.debug_access_view, name='debug_access'),
 ]

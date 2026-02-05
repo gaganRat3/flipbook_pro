@@ -1,942 +1,1667 @@
-</style>
-
-<script>
-function toggleSammelanDropdown(e) {
-    e.preventDefault();
-    var dropdown = document.getElementById('sammelanDropdown');
-    dropdown.style.display = (dropdown.style.display === 'block') ? 'none' : 'block';
-    document.addEventListener('click', function handler(event) {
-        if (!dropdown.contains(event.target) && event.target.id !== 'sammelanDropdownBtn') {
-            dropdown.style.display = 'none';
-            document.removeEventListener('click', handler);
-        }
-    });
-}
-function toggleGenderDropdown(e, dropdownId) {
-    e.preventDefault();
-    var dropdown = document.getElementById(dropdownId);
-    dropdown.style.display = (dropdown.style.display === 'block') ? 'none' : 'block';
-    document.addEventListener('click', function handler(event) {
-        if (!dropdown.contains(event.target) && event.target.id !== dropdownId + 'Btn') {
-            dropdown.style.display = 'none';
-            document.removeEventListener('click', handler);
-        }
-    });
-}
-</script>
 {% extends 'base.html' %}
 
 {% block title %}Library - FlipBook{% endblock %}
 
 {% block content %}
-<div class="library-container">
-    <div class="container">
-        <div class="library-header">
-            <h1><i class="fas fa-book-open"></i> FlipBook Library</h1>
-            <p>Explore our collection of interactive flipbooks</p>
-        </div>
-        
-        <!-- Sammelan-Wise Flip-Books and Event Filter Section -->
-        <div class="dashboard-filter-section" style="background: #fff; border-radius: 18px; box-shadow: 0 6px 32px rgba(250,129,18,0.08); padding: 32px 28px 24px 28px; margin-bottom: 40px;">
-            <div style="display: flex; align-items: center; gap: 18px; margin-bottom: 18px;">
-                <span style="font-size: 28px; color: #FA8112;"><i class="fas fa-sliders-h"></i></span>
-                <h2 style="font-size: 22px; font-weight: 700; color: #222; margin: 0; letter-spacing: 0.5px;">Filter Dashboard</h2>
-            </div>
-            <div style="display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start;">
-                <div style="flex: 1 1 220px; min-width: 220px;">
-                    <div style="font-size: 13px; color: #888; font-weight: 600; margin-bottom: 8px;">Quick Access</div>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <a href="{% url 'home' %}" class="event-filter-btn {% if not selected_event and not my_books_filter and not show_sammelan %}active{% endif %}"><i class="fas fa-list"></i> All Books</a>
-                        <a href="{% url 'home' %}?my_books=true" class="event-filter-btn {% if my_books_filter == 'true' %}active{% endif %}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;"><i class="fas fa-check-circle"></i> My FlipBook</a>
-                    </div>
-                </div>
-                <div style="flex: 1 1 220px; min-width: 220px;">
-                    <div style="font-size: 13px; color: #888; font-weight: 600; margin-bottom: 8px;">Sammelan Events</div>
-                    <div class="dropdown" style="display: inline-block; position: relative; width: 100%;">
-                        <a href="#" id="sammelanDropdownBtn" onclick="toggleSammelanDropdown(event)" class="event-filter-btn {% if show_sammelan %}active{% endif %}" style="background: linear-gradient(135deg, #FA8112 0%, #FF9140 100%); color: white; width: 100%; text-align: left;"><i class="fas fa-book"></i> Sammelan-Wise Flip-Books <i class="fas fa-caret-down" style="float: right;"></i></a>
-                        <div id="sammelanDropdown" class="dropdown-content" style="display: none; position: absolute; left: 0; top: 110%; min-width: 200px; background: #fff; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 1001 !important; padding: 10px 0; width: 100%;">
-                            {% for event in events %}
-                            <a href="{% url 'home' %}?event={{ event.id }}" class="event-filter-btn {% if selected_event == event.id %}active{% endif %}" style="--event-color: {{ event.color }}; display: block; margin: 0 10px 8px 10px;"> <i class="{{ event.icon }}"></i> {{ event.name }} </a>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-                <div style="flex: 1 1 220px; min-width: 220px;">
-                    <div style="font-size: 13px; color: #888; font-weight: 600; margin-bottom: 8px;">Girls Categories</div>
-                    <div class="dropdown" style="position: relative; width: 100%;">
-                        <a href="#" id="girlDropdownBtn" onclick="toggleGenderDropdown(event, 'girlDropdown')" class="gender-filter-btn {% if selected_gender == 'girl' %}active{% endif %}" style="width: 100%; text-align: left;">Girls Biodata Flip-Books <i class="fas fa-caret-down" style="float: right;"></i></a>
-                        <div id="girlDropdown" class="dropdown-content" style="display: none; position: absolute; left: 0; top: 110%; min-width: 220px; background: #fff; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 1001 !important; padding: 10px 0; width: 100%;">
-                            {% for cat in girl_categories %}
-                            <a href="{% url 'home' %}?{% if selected_event %}event={{ selected_event }}&{% endif %}gender=girl&category={{ cat|urlencode }}" class="event-filter-btn {% if selected_category == cat %}active{% endif %}" style="display: block; margin: 0 10px 8px 10px;">{{ cat }}</a>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-                <div style="flex: 1 1 220px; min-width: 220px;">
-                    <div style="font-size: 13px; color: #888; font-weight: 600; margin-bottom: 8px;">Boys Categories</div>
-                    <div class="dropdown" style="position: relative; width: 100%;">
-                        <a href="#" id="boyDropdownBtn" onclick="toggleGenderDropdown(event, 'boyDropdown')" class="gender-filter-btn {% if selected_gender == 'boy' %}active{% endif %}" style="width: 100%; text-align: left;">Boys Biodata Flip-Books <i class="fas fa-caret-down" style="float: right;"></i></a>
-                        <div id="boyDropdown" class="dropdown-content" style="display: none; position: absolute; left: 0; top: 110%; min-width: 220px; background: #fff; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 1001 !important; padding: 10px 0; width: 100%;">
-                            {% for cat in boy_categories %}
-                            <a href="{% url 'home' %}?{% if selected_event %}event={{ selected_event }}&{% endif %}gender=boy&category={{ cat|urlencode }}" class="event-filter-btn {% if selected_category == cat %}active{% endif %}" style="display: block; margin: 0 10px 8px 10px;">{{ cat }}</a>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<style>
+  .filter-buttons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+  }
 
-            <!-- Category Buttons for Girls/Boys -->
-            {% if selected_gender == 'girl' %}
-            <div class="category-filter-container" style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
-                {% for cat in girl_categories %}
-                <a href="{% url 'home' %}?{% if selected_event %}event={{ selected_event }}&{% endif %}gender=girl&category={{ cat|urlencode }}" class="event-filter-btn {% if selected_category == cat %}active{% endif %}">{{ cat }}</a>
-                {% endfor %}
-            </div>
-            {% elif selected_gender == 'boy' %}
-            <div class="category-filter-container" style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
-                {% for cat in boy_categories %}
-                <a href="{% url 'home' %}?{% if selected_event %}event={{ selected_event }}&{% endif %}gender=boy&category={{ cat|urlencode }}" class="event-filter-btn {% if selected_category == cat %}active{% endif %}">{{ cat }}</a>
-                {% endfor %}
-            </div>
-            {% endif %}
-        </div>
-        
-        {% if books %}
-        <!-- Event-wise Booklet Display -->
-        {% if selected_event %}
-            <!-- Single Event View -->
-            <div class="books-grid">
-                {% for book in books %}
-                <div class="book-card">
-                    {% if book.id in accessible_ids %}
-                        <a href="{% url 'flipbook' book.id %}" class="book-link">
-                            <div class="book-thumbnail">
-                                <span class="book-status-badge accessible"><i class="fas fa-check-circle"></i> Accessible</span>
-                                {% if book.thumbnail %}
-                                <img src="{{ book.thumbnail.url }}" alt="{{ book.title }}">
-                                {% else %}
-                                <div class="book-placeholder"><i class="fas fa-book-open"></i></div>
-                                {% endif %}
-                                <div class="book-overlay"><i class="fas fa-eye"></i><span>View Book</span></div>
-                            </div>
-                            <div class="book-info">
-                                <h3>{{ book.title }}</h3>
-                                {% if book.description %}<p>{{ book.description|truncatewords:15 }}</p>{% endif %}
-                                <div class="book-meta">
-                                    <span><i class="fas fa-file-pdf"></i> {{ book.total_pages }} pages</span>
-                                    <span><i class="fas fa-calendar"></i> {{ book.created_at|date:"M d, Y" }}</span>
-                                </div>
-                            </div>
-                        </a>
-                    {% else %}
-                        <div class="book-link book-locked">
-                            <div class="book-thumbnail">
-                                <span class="book-status-badge locked"><i class="fas fa-lock"></i> Locked</span>
-                                {% if book.thumbnail %}
-                                <img src="{{ book.thumbnail.url }}" alt="{{ book.title }}">
-                                {% else %}
-                                <div class="book-placeholder"><i class="fas fa-book-open"></i></div>
-                                {% endif %}
-                                <div class="book-overlay book-overlay-locked">
-                                    <div class="lock-content">
-                                        <i class="fas fa-lock"></i>
-                                        <span>Locked</span>
-                                        <button class="btn-unlock" onclick="openUnlockModal({{ book.id }}, '{{ book.title }}')">
-                                            <i class="fas fa-credit-card"></i> Pay to Unlock
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="book-info">
-                                <h3>{{ book.title }}</h3>
-                                {% if book.description %}<p>{{ book.description|truncatewords:15 }}</p>{% endif %}
-                                <div class="book-meta">
-                                    <span><i class="fas fa-file-pdf"></i> {{ book.total_pages }} pages</span>
-                                    <span><i class="fas fa-calendar"></i> {{ book.created_at|date:"M d, Y" }}</span>
-                                </div>
-                            </div>
-                        </div>
-                    {% endif %}
-                </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <!-- All Events View -->
-            {% regroup books by event as books_by_event %}
-            {% for grouper in books_by_event %}
-                <div class="event-section" {% if grouper.grouper %}style="--event-color: {{ grouper.grouper.color }};"{% endif %}>
-                    <div class="event-header">
-                        {% if grouper.grouper %}
-                            <div class="event-title-wrapper">
-                                <i class="{{ grouper.grouper.icon }}"></i>
-                                <h2>{{ grouper.grouper.name }}</h2>
-                            </div>
-                            {% if grouper.grouper.description %}
-                            <p class="event-description">{{ grouper.grouper.description }}</p>
-                            {% endif %}
-                        {% else %}
-                            <div class="event-title-wrapper">
-                                <i class="fas fa-inbox"></i>
-                                <h2>Uncategorized Books</h2>
-                            </div>
-                        {% endif %}
-                    </div>
-                    <div class="books-grid">
-                        {% for book in grouper.list %}
-                        <div class="book-card">
-                            {% if book.id in accessible_ids %}
-                                <a href="{% url 'flipbook' book.id %}" class="book-link">
-                                    <div class="book-thumbnail">
-                                        <span class="book-status-badge accessible"><i class="fas fa-check-circle"></i> Accessible</span>
-                                        {% if book.thumbnail %}
-                                        <img src="{{ book.thumbnail.url }}" alt="{{ book.title }}">
-                                        {% else %}
-                                        <div class="book-placeholder"><i class="fas fa-book-open"></i></div>
-                                        {% endif %}
-                                        <div class="book-overlay"><i class="fas fa-eye"></i><span>View Book</span></div>
-                                    </div>
-                                    <div class="book-info">
-                                        <h3>{{ book.title }}</h3>
-                                        {% if book.description %}<p>{{ book.description|truncatewords:15 }}</p>{% endif %}
-                                        <div class="book-meta">
-                                            <span><i class="fas fa-file-pdf"></i> {{ book.total_pages }} pages</span>
-                                            <span><i class="fas fa-calendar"></i> {{ book.created_at|date:"M d, Y" }}</span>
-                                        </div>
-                                    </div>
-                                </a>
-                            {% else %}
-                                <div class="book-link book-locked">
-                                    <div class="book-thumbnail">
-                                        <span class="book-status-badge locked"><i class="fas fa-lock"></i> Locked</span>
-                                        {% if book.thumbnail %}
-                                        <img src="{{ book.thumbnail.url }}" alt="{{ book.title }}">
-                                        {% else %}
-                                        <div class="book-placeholder"><i class="fas fa-book-open"></i></div>
-                                        {% endif %}
-                                        <div class="book-overlay book-overlay-locked">
-                                            <div class="lock-content">
-                                                <i class="fas fa-lock"></i>
-                                                <span>Locked</span>
-                                                <button class="btn-unlock" onclick="openUnlockModal({{ book.id }}, '{{ book.title }}')">
-                                                    <i class="fas fa-credit-card"></i> Pay to Unlock
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="book-info">
-                                        <h3>{{ book.title }}</h3>
-                                        {% if book.description %}<p>{{ book.description|truncatewords:15 }}</p>{% endif %}
-                                        <div class="book-meta">
-                                            <span><i class="fas fa-file-pdf"></i> {{ book.total_pages }} pages</span>
-                                            <span><i class="fas fa-calendar"></i> {{ book.created_at|date:"M d, Y" }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            {% endif %}
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            {% endfor %}
-        {% endif %}
-        {% else %}
-        <div class="empty-state">
-            <i class="fas fa-inbox"></i>
-            <h2>{% if selected_event %}No Books in This Event{% else %}No FlipBooks Available{% endif %}</h2>
-            <p>
-                {% if selected_event %}
-                    <a href="{% url 'home' %}" class="reset-filter-link">View All Events</a>
-                {% else %}
-                    You do not have access to any flipbook yet.<br>
-                    Please contact an administrator to grant you access. Come back after access is given.
-                {% endif %}
-            </p>
-        </div>
-        {% endif %}
+  .filter-button-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .filter-button-group label {
+    font-size: 13px;
+    color: #888;
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .filter-buttons-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .sammelan-events-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .mela-type-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .categories-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  @media (max-width: 768px) {
+    .sammelan-events-grid,
+    .mela-type-grid,
+    .categories-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .filter-btn {
+    padding: 12px 18px;
+    border: 2px solid #fa8112;
+    background: #fff;
+    color: #fa8112;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .filter-btn:hover {
+    background: #e8f1f7;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(46, 134, 171, 0.2);
+  }
+
+  .filter-btn.active {
+    background: linear-gradient(135deg, #2E86AB 0%, #1e5f8d 100%);
+    color: #ffffff;
+    border-color: #2E86AB;
+    box-shadow: 0 6px 20px rgba(46, 134, 171, 0.3);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    font-weight: 700;
+  }
+
+  .filter-btn-category {
+    border-color: #8e44ad;
+    color: #8e44ad;
+  } 
+
+  .filter-btn-category:hover {
+    background: #f4e8ff;
+    border-color: #8e44ad;
+  }
+
+  .filter-btn-category.active {
+    background: linear-gradient(135deg, #8e44ad 0%, #a86fd0 100%);
+    color: white;
+    border-color: #8e44ad;
+    box-shadow: 0 6px 20px rgba(142, 68, 173, 0.3);
+  }
+
+  .filter-btn-boys {
+    border-color: #4ecdc4;
+    color: #4ecdc4;
+  }
+
+  .filter-btn-boys:hover {
+    background: #e0f7f6;
+  }
+
+  .filter-btn-boys.active {
+    background: linear-gradient(135deg, #4ecdc4 0%, #44b9b0 100%);
+    color: white;
+    border-color: #4ecdc4;
+    box-shadow: 0 6px 20px rgba(78, 205, 196, 0.3);
+  }
+
+  .filter-btn-girls {
+    border-color: #ff6b6b;
+    color: #ff6b6b;
+  }
+
+  .filter-btn-girls:hover {
+    background: #ffe8e8;
+  }
+
+  .filter-btn-girls.active {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%);
+    color: white;
+    border-color: #ff6b6b;
+    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.3);
+  }
+
+  .category-collapse-toggle {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border: 2px solid #8e44ad;
+    background: #fff;
+    color: #8e44ad;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+  }
+
+  .category-collapse-toggle:hover {
+    background: #f4e8ff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(142, 68, 173, 0.2);
+  }
+
+  .category-collapse-toggle.active {
+    background: linear-gradient(135deg, #8e44ad 0%, #a86fd0 100%);
+    color: white !important;
+    border-color: #8e44ad;
+    box-shadow: 0 6px 20px rgba(142, 68, 173, 0.3);
+  }
+
+  .category-subcategories {
+    display: none;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+    padding-left: 0;
+  }
+
+  .category-subcategories.show {
+    display: flex;
+    animation: slideDown 0.3s ease;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .category-wrapper {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 8px;
+  }
+
+  /* Book Card Styling */
+  .books-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+  }
+
+  .book-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    transition: all 0.3s ease;
+    border: 3px solid #e8b4d4;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .book-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+    border-color: #e89ec7;
+  }
+
+  .book-link {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .book-link.book-locked {
+    cursor: not-allowed;
+  }
+
+  .book-thumbnail {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #FAF3E1 0%, #F5E7C6 100%);
+    aspect-ratio: 3 / 4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .book-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  .book-link:hover .book-thumbnail img {
+    transform: scale(1.05);
+  }
+
+  .book-placeholder {
+    font-size: 48px;
+    color: #ccc;
+  }
+
+  .book-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(46, 134, 171, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .book-link:hover .book-overlay {
+    opacity: 1;
+  }
+
+  .book-overlay i {
+    font-size: 32px;
+  }
+
+  .book-overlay-locked {
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.7) 100%);
+    opacity: 1;
+    backdrop-filter: blur(8px);
+  }
+
+  .lock-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    color: white;
+    text-align: center;
+    padding: 20px;
+  }
+
+    /* Unlock Modal Styles */
+    .unlock-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.9);
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      z-index: 10001;
+      max-width: 550px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .unlock-modal.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    .unlock-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 10000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    .unlock-modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .unlock-modal-content {
+      position: relative;
+      padding: 40px 30px;
+    }
+    .modal-close-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: #f3f4f6;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: #666;
+      transition: all 0.3s ease;
+      z-index: 10002;
+    }
+    .modal-close-btn:hover {
+      background: #e5e7eb;
+      color: #333;
+      transform: rotate(90deg);
+    }
+    .modal-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .modal-header i {
+      font-size: 50px;
+      color: #dc2626;
+      margin-bottom: 15px;
+      display: block;
+    }
+    .modal-header h2 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #333;
+      margin: 0 0 10px 0;
+    }
+    .modal-book-title {
+      font-size: 16px;
+      color: #666;
+      margin: 0;
+      font-weight: 600;
+    }
+    .unlock-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    .form-group label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .required {
+      color: #dc2626;
+      font-weight: 700;
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      padding: 12px 14px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      transition: all 0.3s ease;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #fa8112;
+      background: #fffbf7;
+      box-shadow: 0 0 0 3px rgba(250, 129, 18, 0.1);
+    }
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: #bbb;
+    }
+    .form-hint {
+      font-size: 12px;
+      color: #999;
+      margin-top: 4px;
+    }
+    .qr-code-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 20px;
+      background: #f9fafb;
+      border: 2px dashed #e5e7eb;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .qr-code-container i {
+      font-size: 32px;
+      color: #fa8112;
+    }
+    .qr-code-image {
+      max-width: 150px;
+      max-height: 150px;
+      border-radius: 6px;
+    }
+    .form-checkbox {
+      flex-direction: row;
+      align-items: center;
+      gap: 10px;
+      margin: 15px 0;
+    }
+    .form-checkbox input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: #fa8112;
+    }
+    .form-checkbox label {
+      margin: 0;
+      cursor: pointer;
+      flex-direction: row;
+    }
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 25px;
+      justify-content: flex-end;
+    }
+    .btn-cancel,
+    .btn-submit {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+    .btn-cancel {
+      background: #f3f4f6;
+      color: #666;
+    }
+    .btn-cancel:hover {
+      background: #e5e7eb;
+      color: #333;
+    }
+    .btn-submit {
+      background: linear-gradient(135deg, #fa8112 0%, #ff9140 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(250, 129, 18, 0.3);
+    }
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(250, 129, 18, 0.4);
+    }
+    .btn-submit:active {
+      transform: translateY(0);
+    }
+    .success-message {
+      text-align: center;
+      padding: 30px 20px;
+    }
+    .success-message i {
+      font-size: 60px;
+      color: #10b981;
+      margin-bottom: 15px;
+      display: block;
+    }
+    .success-message h3 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #333;
+      margin: 0 0 10px 0;
+    }
+    .success-message p {
+      font-size: 14px;
+      color: #666;
+      margin: 8px 0;
+      line-height: 1.6;
+    }
+    .btn-close-success {
+      margin-top: 20px;
+      padding: 12px 30px;
+      background: #10b981;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .btn-close-success:hover {
+      background: #059669;
+    }
+    @media (max-width: 768px) {
+      .unlock-modal {
+        max-width: 95%;
+        width: 95%;
+      }
+      .unlock-modal-content {
+        padding: 30px 20px;
+      }
+      .modal-header h2 {
+        font-size: 24px;
+      }
+      .form-actions {
+        flex-direction: column;
+      }
+      .btn-cancel,
+      .btn-submit {
+        width: 100%;
+      }
+    }
+
+  .lock-content i {
+    font-size: 48px;
+    color: #fbbf24;
+    opacity: 0.95;
+    filter: drop-shadow(0 4px 12px rgba(251, 191, 36, 0.2));
+  }
+
+  .lock-content > span {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-unlock {
+    padding: 12px 28px;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.25);
+    letter-spacing: 0.3px;
+  }
+
+  .btn-unlock:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(59, 130, 246, 0.35);
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  }
+
+  .btn-unlock:active {
+    transform: translateY(0);
+  }
+
+  .book-status-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 10;
+    backdrop-filter: blur(10px);
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .book-status-badge.accessible {
+    background: rgba(16, 185, 129, 0.95);
+    color: white;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+
+  .book-status-badge.locked {
+    background: rgba(239, 68, 68, 0.95);
+    color: white;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+
+  .book-info {
+    padding: 18px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border-top: 2px solid #f0f0f0;
+  }
+
+  .book-info h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 10px 0;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    letter-spacing: 0.2px;
+  }
+
+  .book-info p {
+    font-size: 12px;
+    color: #777;
+    margin: 0 0 12px 0;
+    line-height: 1.45;
+    flex-grow: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .book-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 11px;
+    color: #888;
+    border-top: 1px solid #f0f0f0;
+    padding-top: 12px;
+    margin-top: auto;
+  }
+
+  .book-meta span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+  }
+
+  .book-meta i {
+    color: #3b82f6;
+    min-width: 14px;
+    font-size: 11px;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+  }
+
+  .empty-state i {
+    font-size: 64px;
+    color: #ddd;
+    margin-bottom: 20px;
+  }
+
+  .empty-state h2 {
+    font-size: 24px;
+    color: #222;
+    margin-bottom: 12px;
+  }
+
+  .empty-state p {
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+
+  .reset-filter-link {
+    color: #2E86AB;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 10px 20px;
+    border: 2px solid #2E86AB;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    display: inline-block;
+  }
+
+  .reset-filter-link:hover {
+    background: #2E86AB;
+    color: white;
+  }
+
+  .library-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    padding: 60px 40px;
+    border-radius: 20px;
+    margin-bottom: 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4);
+  }
+
+  .library-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .library-header::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -5%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .library-header h1 {
+    font-size: 48px;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 12px 0;
+    letter-spacing: 1px;
+    text-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .library-header h1 i {
+    font-size: 52px;
+    animation: bounce 3s ease-in-out infinite;
+  }
+
+  .library-header p {
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.95);
+    margin: 0;
+    letter-spacing: 0.5px;
+    position: relative;
+    z-index: 1;
+    font-weight: 500;
+  }
+
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  /* Event Section Styling */
+  .event-section {
+    margin-bottom: 60px;
+    position: relative;
+  }
+
+  .event-header {
+    background: linear-gradient(135deg, var(--event-color, #667eea) 0%, var(--event-color, #667eea) 100%);
+    padding: 40px 32px;
+    border-radius: 16px;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  .event-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .event-header::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -5%;
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .event-title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .event-title-wrapper i {
+    font-size: 42px;
+    color: #ffffff;
+    animation: bounce 3s ease-in-out infinite;
+  }
+
+  .event-title-wrapper h2 {
+    font-size: 36px;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .event-description {
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 15px;
+    margin: 12px 0 0 0;
+    position: relative;
+    z-index: 1;
+    line-height: 1.5;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+  }
+
+  @media (max-width: 768px) {
+    .event-header {
+      padding: 28px 20px;
+    }
+
+    .event-title-wrapper h2 {
+      font-size: 24px;
+    }
+
+    .event-title-wrapper i {
+      font-size: 32px;
+    }
+
+    .event-description {
+      font-size: 13px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .event-header {
+      padding: 20px 16px;
+    }
+
+    .event-title-wrapper {
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .event-title-wrapper h2 {
+      font-size: 20px;
+    }
+
+    .event-title-wrapper i {
+      font-size: 28px;
+    }
+
+    .event-description {
+      font-size: 12px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .library-header {
+      padding: 40px 20px;
+    }
+
+    .library-header h1 {
+      font-size: 32px;
+      gap: 10px;
+    }
+
+    .library-header h1 i {
+      font-size: 36px;
+    }
+
+    .library-header p {
+      font-size: 14px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .library-header {
+      padding: 30px 15px;
+    }
+
+    .library-header h1 {
+      font-size: 24px;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .library-header h1 i {
+      font-size: 28px;
+    }
+  }
+    .books-grid {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .book-thumbnail {
+      aspect-ratio: 3 / 4;
+    }
+
+    .book-info {
+      padding: 12px;
+    }
+
+    .book-info h3 {
+      font-size: 14px;
+    }
+  }
+</style>
+
+<div class="library-container">
+  <div class="container">
+    <div class="library-header">
+      <h1><i class="fas fa-book-open"></i> FlipBook Library</h1>
+      <p>Explore our collection of interactive flipbooks</p>
     </div>
+
+    <!-- Filter Dashboard with Buttons -->
+    <div
+      class="dashboard-filter-section"
+      style="
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 6px 32px rgba(250, 129, 18, 0.08);
+        padding: 32px 28px 24px 28px;
+        margin-bottom: 40px;
+      "
+    >
+      <div
+        style="
+          display: flex;
+          align-items: center;
+          gap: 18px;
+          margin-bottom: 24px;
+        "
+      >
+        <span style="font-size: 28px; color: #fa8112"
+          ><i class="fas fa-sliders-h"></i
+        ></span>
+        <h2
+          style="
+            font-size: 22px;
+            font-weight: 700;
+            color: #222;
+            margin: 0;
+            letter-spacing: 0.5px;
+          "
+        >
+          Filter Dashboard
+        </h2>
+      </div>
+
+      <!-- Quick Access Buttons -->
+      <div class="filter-button-group" style="margin-bottom: 24px">
+        <label><i class="fas fa-bolt"></i> Quick Access</label>
+        <div class="filter-buttons-container">
+          <a
+            href="{% url 'home' %}"
+            class="filter-btn {% if not selected_event and not my_books_filter and not show_sammelan %}active{% endif %}"
+            style="border-color: #fa8112"
+            ><i class="fas fa-list"></i> All Books</a
+          >
+          <a
+            href="{% url 'home' %}?my_books=true"
+            class="filter-btn {% if my_books_filter == 'true' %}active{% endif %}"
+            style="border-color: #dbdbdb; color: #ff7272"
+            ><i class="fas fa-check-circle"></i> My FlipBooks</a
+          >
+        </div>
+      </div>
+
+      <!-- Sammelan Events Buttons -->
+      <div class="filter-button-group" style="margin-bottom: 24px">
+        <label><i class="fas fa-calendar"></i> Sammelan Events</label>
+        <br>
+        <div class="sammelan-events-grid">
+          {% for event in events %}
+          <div class="category-wrapper">
+            <button
+              type="button"
+              class="category-collapse-toggle {% if selected_event == event.id %}active{% endif %}"
+              onclick="toggleEventSubcategories(event, '{{ event.id }}')"
+              style="width: 100%; border-color: {{ event.color }}; color: {{ event.color }};"
+            >
+              <i class="{{ event.icon }}"></i> {{ event.name }}
+            </button>
+            <div class="category-subcategories" id="event-subcat-{{ event.id }}">
+              {% comment %} <a
+                href="{% url 'home' %}?event={{ event.id }}"
+                class="filter-btn {% if selected_event == event.id and not selected_mela_type %}active{% endif %}"
+                ><i class="fas fa-inbox"></i> All Melas</a
+              > {% endcomment %}
+              <a
+                href="{% url 'home' %}?event={{ event.id }}&mela_type=boys"
+                class="filter-btn filter-btn-boys {% if selected_event == event.id and selected_mela_type == 'boys' %}active{% endif %}"
+                ><i class="fas fa-mars"></i> Boys</a
+              >
+              <a
+                href="{% url 'home' %}?event={{ event.id }}&mela_type=girls"
+                class="filter-btn filter-btn-girls {% if selected_event == event.id and selected_mela_type == 'girls' %}active{% endif %}"
+                ><i class="fas fa-venus"></i> Girls</a
+              >
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+
+      <!-- Mela Type Filter removed - now part of each event's subcategories -->
+
+      <!-- Categories Buttons with Subcategories -->
+      <div class="filter-button-group">
+        <label><i class="fas fa-tag"></i> Categories</label>
+        <br>
+        <div class="categories-grid">
+          {% for category in categories %}
+          <div class="category-wrapper">
+            <button
+              type="button"
+              class="category-collapse-toggle {% if selected_category == category.id %}active{% endif %}"
+              onclick="toggleCategorySubcategories(event, '{{ category.id }}')"
+              style="width: 100%;"
+            >
+              <i class="fas fa-bookmark"></i> {{ category.name }}
+            </button>
+            <div class="category-subcategories" id="subcat-{{ category.id }}">
+              {% comment %} <a
+                href="{% url 'home' %}?category={{ category.id }}"
+                class="filter-btn filter-btn-category {% if selected_category == category.id and not selected_mela_type %}active{% endif %}"
+                ><i class="fas fa-inbox"></i> All Melas</a
+              > {% endcomment %}
+              <a
+                href="{% url 'home' %}?category={{ category.id }}&mela_type=boys"
+                class="filter-btn filter-btn-boys {% if selected_category == category.id and selected_mela_type == 'boys' %}active{% endif %}"
+                ><i class="fas fa-mars"></i> Boys</a
+              >
+              <a
+                href="{% url 'home' %}?category={{ category.id }}&mela_type=girls"
+                class="filter-btn filter-btn-girls {% if selected_category == category.id and selected_mela_type == 'girls' %}active{% endif %}"
+                ><i class="fas fa-venus"></i> Girls</a
+              >
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    {% if books %}
+    <!-- Books Display -->
+    {% if selected_event %}
+    <!-- Single Event View -->
+    <div class="books-grid">
+      {% for book in books %}
+      <div class="book-card">
+        {% if book.id in accessible_ids %}
+        <a href="{% url 'flipbook' book.id %}" class="book-link">
+          <div class="book-thumbnail">
+            <span class="book-status-badge accessible"
+              ><i class="fas fa-check-circle"></i> Accessible</span
+            >
+            {% if book.thumbnail %}
+            <img src="{{ book.thumbnail.url }}" alt="{{ book.title }}" />
+            {% else %}
+            <div class="book-placeholder"><i class="fas fa-book-open"></i></div>
+            {% endif %}
+            <div class="book-overlay">
+              <i class="fas fa-eye"></i><span>View Book</span>
+            </div>
+          </div>
+          <div class="book-info">
+            <h3>{{ book.title }}</h3>
+            {% if book.description %}
+            <p>{{ book.description|truncatewords:15 }}</p>
+            {% endif %}
+            <div class="book-meta">
+              <span><i class="fas fa-file-pdf"></i> {{ book.total_pages }} pages</span>
+            </div>
+          </div>
+        </a>
+        {% else %}
+        <div class="book-link book-locked">
+          <div class="book-thumbnail">
+            <span class="book-status-badge locked"
+              ><i class="fas fa-lock"></i> Locked</span
+            >
+            {% if book.thumbnail %}
+            <img src="{{ book.thumbnail.url }}" alt="{{ book.title }}" />
+            {% else %}
+            <div class="book-placeholder"><i class="fas fa-book-open"></i></div>
+            {% endif %}
+            <div class="book-overlay book-overlay-locked">
+              <div class="lock-content">
+                <i class="fas fa-lock"></i>
+                <span>Locked</span>
+                <button
+                  class="btn-unlock"
+                  onclick="openUnlockModal({{ book.id }}, '{{ book.title }}')"
+                >
+                  <i class="fas fa-credit-card"></i> Pay to Unlock
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="book-info">
+            <h3>{{ book.title }}</h3>
+            {% if book.description %}
+            <p>{{ book.description|truncatewords:15 }}</p>
+            {% endif %}
+            <div class="book-meta">
+              <span><i class="fas fa-file-pdf"></i> {{ book.total_pages }} pages</span>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <!-- All Events View -->
+    {% regroup books by event as books_by_event %}
+    {% for grouper in books_by_event %}
+    <div
+      class="event-section"
+      {%
+      if
+      grouper.grouper
+      %}style="--event-color: {{ grouper.grouper.color }};"
+      {%
+      endif
+      %}
+    >
+      <div class="event-header">
+        {% if grouper.grouper %}
+        <div class="event-title-wrapper">
+          <i class="{{ grouper.grouper.icon }}"></i>
+          <h2>{{ grouper.grouper.name }}</h2>
+        </div>
+        {% if grouper.grouper.description %}
+        <p class="event-description">{{ grouper.grouper.description }}</p>
+        {% endif %}
+        {% else %}
+        <div class="event-title-wrapper">
+          <i class="fas fa-inbox"></i>
+          <h2>Uncategorized Books</h2>
+        </div>
+        {% endif %}
+      </div>
+      <div class="books-grid">
+        {% for book in grouper.list %}
+        <div class="book-card">
+          {% if book.id in accessible_ids %}
+          <a href="{% url 'flipbook' book.id %}" class="book-link">
+            <div class="book-thumbnail">
+              <span class="book-status-badge accessible"
+                ><i class="fas fa-check-circle"></i> Accessible</span
+              >
+              {% if book.thumbnail %}
+              <img src="{{ book.thumbnail.url }}" alt="{{ book.title }}" />
+              {% else %}
+              <div class="book-placeholder">
+                <i class="fas fa-book-open"></i>
+              </div>
+              {% endif %}
+              <div class="book-overlay">
+                <i class="fas fa-eye"></i><span>View Book</span>
+              </div>
+            </div>
+            <div class="book-info">
+              <h3>{{ book.title }}</h3>
+              {% if book.description %}
+              <p>{{ book.description|truncatewords:15 }}</p>
+              {% endif %}
+              <div class="book-meta">
+                <span><i class="fas fa-file-pdf"></i> {{ book.total_pages }} pages</span>
+              </div>
+            </div>
+          </a>
+          {% else %}
+          <div class="book-link book-locked">
+            <div class="book-thumbnail">
+              <span class="book-status-badge locked"
+                ><i class="fas fa-lock"></i> Locked</span
+              >
+              {% if book.thumbnail %}
+              <img src="{{ book.thumbnail.url }}" alt="{{ book.title }}" />
+              {% else %}
+              <div class="book-placeholder">
+                <i class="fas fa-book-open"></i>
+              </div>
+              {% endif %}
+              <div class="book-overlay book-overlay-locked">
+                <div class="lock-content">
+                  <i class="fas fa-lock"></i>
+                  <span>Locked</span>
+                  <button
+                    class="btn-unlock"
+                    onclick="openUnlockModal({{ book.id }}, '{{ book.title }}')"
+                  >
+                    <i class="fas fa-credit-card"></i> Pay to Unlock
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="book-info">
+              <h3>{{ book.title }}</h3>
+              {% if book.description %}
+              <p>{{ book.description|truncatewords:15 }}</p>
+              {% endif %}
+              <div class="book-meta">
+                <span><i class="fas fa-file-pdf"></i> {{ book.total_pages }} pages</span>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% else %}
+    <div class="empty-state">
+      <i class="fas fa-inbox"></i>
+      <h2>
+        {% if selected_event %}No Books in This Event{% else %}No FlipBooks
+        Available{% endif %}
+      </h2>
+      <p>
+        {% if selected_event %}
+        <a href="{% url 'home' %}" class="reset-filter-link">View All Events</a>
+        {% else %} You do not have access to any flipbook yet.<br />
+        Please contact an administrator to grant you access. Come back after
+        access is given. {% endif %}
+      </p>
+    </div>
+    {% endif %}
+  </div>
 </div>
+
 
 <!-- Pay to Unlock Modal -->
 <div id="unlockModal" class="unlock-modal">
-    <div class="unlock-modal-content">
-        <button class="modal-close-btn" onclick="closeUnlockModal()">
-            <i class="fas fa-times"></i>
-        </button>
-        
-        <div class="modal-header">
-            <i class="fas fa-lock"></i>
-            <h2>Request Access</h2>
-            <p id="bookTitle" class="modal-book-title">Book Title</p>
-        </div>
-        
-        <form id="unlockForm" class="unlock-form">
-            <!-- Hidden field for book ID -->
-            <input type="hidden" id="bookId" name="book_id" value="">
-            
-            <div class="form-group">
-                <label for="candidateFullName">Candidate Full Name <span class="required">*</span></label>
-                <input type="text" id="candidateFullName" name="candidate_full_name" placeholder="Enter your full name" required>
-                <small class="form-hint">Your complete name</small>
-            </div>
-            
-            <div class="form-group">
-                <label for="dateOfBirth">Date of Birth <span class="required">*</span></label>
-                <input type="date" id="dateOfBirth" name="date_of_birth" required>
-                <small class="form-hint">Your date of birth</small>
-            </div>
-            
-            <div class="form-group">
-                <label for="parentsMobileNumber">Parents Mobile Number <span class="required">*</span></label>
-                <input type="tel" id="parentsMobileNumber" name="parents_mobile_number" placeholder="Enter parents mobile number" required>
-                <small class="form-hint">Contact number of parents/guardians</small>
-            </div>
-            
-            <div class="form-group">
-                <label for="maritalStatus">Marital Status <span class="required">*</span></label>
-                <select id="maritalStatus" name="marital_status" required>
-                    <option value="">-- Select Marital Status --</option>
-                    <option value="single">Single</option>
-                    <option value="married">Married</option>
-                    <option value="divorced">Divorced</option>
-                    <option value="widowed">Widowed</option>
-                    <option value="other">Other</option>
-                </select>
-                <small class="form-hint">Please select your marital status</small>
-            </div>
-            
-            <div class="form-group">
-                <label for="qrCode">Scan QR Code to Pay <span class="required">*</span></label>
-                <div class="qr-code-container">
-                    <i class="fas fa-qrcode"></i>
-                    <p>Scan the QR code below to complete your payment</p>
-                    <!-- QR Code display area - you can add your QR code image here -->
-                    <img src="https://via.placeholder.com/200x200?text=QR+Code" alt="Payment QR Code" class="qr-code-image">
-                </div>
-                <small class="form-hint">Use your phone camera or QR code scanner</small>
-            </div>
-            
-            <div class="form-group">
-                <label for="paymentScreenshot">Upload Payment Screenshot <span class="required">*</span></label>
-                <input type="file" id="paymentScreenshot" name="payment_screenshot" accept="image/*" required>
-                <small class="form-hint">Upload a screenshot of your payment confirmation</small>
-            </div>
-            
-            <div class="form-group form-checkbox">
-                <input type="checkbox" id="terms" name="terms" required>
-                <label for="terms">I agree to the terms and conditions <span class="required">*</span></label>
-            </div>
-            
-            <div class="form-actions">
-                <button type="button" class="btn-cancel" onclick="closeUnlockModal()">Cancel</button>
-                <button type="submit" class="btn-submit">
-                    <i class="fas fa-paper-plane"></i> Submit Request
-                </button>
-            </div>
-        </form>
-        
-        <div id="successMessage" class="success-message" style="display: none;">
-            <i class="fas fa-check-circle"></i>
-            <h3>Request Submitted!</h3>
-            <p>Your access request has been submitted successfully.</p>
-            <p>Our admin team will review your request and you'll receive confirmation via email.</p>
-            <button type="button" class="btn-close-success" onclick="closeUnlockModal()">Close</button>
-        </div>
+  <div class="unlock-modal-content">
+    <button class="modal-close-btn" onclick="closeUnlockModal()">
+      <i class="fas fa-times"></i>
+    </button>
+
+    <div class="modal-header">
+      <i class="fas fa-lock"></i>
+      <h2>Request Access</h2>
+      <p id="bookTitle" class="modal-book-title">Book Title</p>
     </div>
+
+    <form id="unlockForm" class="unlock-form">
+      <!-- Hidden field for book ID -->
+      <input type="hidden" id="bookId" name="book_id" value="" />
+
+      <div class="form-group">
+        <label for="candidateFullName"
+          >Candidate Full Name <span class="required">*</span></label
+        >
+        <input
+          type="text"
+          id="candidateFullName"
+          name="candidate_full_name"
+          placeholder="Enter your full name"
+          required
+        />
+        <small class="form-hint">Your complete name</small>
+      </div>
+
+      <div class="form-group">
+        <label for="dateOfBirth"
+          >Date of Birth <span class="required">*</span></label
+        >
+        <input type="date" id="dateOfBirth" name="date_of_birth" required />
+        <small class="form-hint">Your date of birth</small>
+      </div>
+
+      <div class="form-group">
+        <label for="parentsMobileNumber"
+          >Parents Mobile Number <span class="required">*</span></label
+        >
+        <input
+          type="tel"
+          id="parentsMobileNumber"
+          name="parents_mobile_number"
+          placeholder="Enter parents mobile number"
+          required
+        />
+        <small class="form-hint">Contact number of parents/guardians</small>
+      </div>
+
+      <div class="form-group">
+        <label for="maritalStatus"
+          >Marital Status <span class="required">*</span></label
+        >
+        <select id="maritalStatus" name="marital_status" required>
+          <option value="">-- Select Marital Status --</option>
+          <option value="single">Single</option>
+          <option value="married">Married</option>
+          <option value="divorced">Divorced</option>
+          <option value="widowed">Widowed</option>
+          <option value="other">Other</option>
+        </select>
+        <small class="form-hint">Please select your marital status</small>
+      </div>
+
+      <div class="form-group">
+        <label for="qrCode"
+          >Scan QR Code to Pay <span class="required">*</span></label
+        >
+        <div class="qr-code-container">
+          <i class="fas fa-qrcode"></i>
+          <p>Scan the QR code below to complete your payment</p>
+          <!-- QR Code display area - you can add your QR code image here -->
+          <img
+            src="https://via.placeholder.com/200x200?text=QR+Code"
+            alt="Payment QR Code"
+            class="qr-code-image"
+          />
+        </div>
+        <small class="form-hint"
+          >Use your phone camera or QR code scanner</small
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="paymentScreenshot"
+          >Upload Payment Screenshot <span class="required">*</span></label
+        >
+        <input
+          type="file"
+          id="paymentScreenshot"
+          name="payment_screenshot"
+          accept="image/*"
+          required
+        />
+        <small class="form-hint"
+          >Upload a screenshot of your payment confirmation</small
+        >
+      </div>
+
+      <div class="form-group form-checkbox">
+        <input type="checkbox" id="terms" name="terms" required />
+        <label for="terms"
+          >I agree to the terms and conditions
+          <span class="required">*</span></label
+        >
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" onclick="closeUnlockModal()">
+          Cancel
+        </button>
+        <button type="submit" class="btn-submit">
+          <i class="fas fa-paper-plane"></i> Submit Request
+        </button>
+      </div>
+    </form>
+
+    <div id="successMessage" class="success-message" style="display: none">
+      <i class="fas fa-check-circle"></i>
+      <h3>Request Submitted!</h3>
+      <p>Your access request has been submitted successfully.</p>
+      <p>
+        Our admin team will review your request and you'll receive confirmation
+        via email.
+      </p>
+      <button
+        type="button"
+        class="btn-close-success"
+        onclick="closeUnlockModal()"
+      >
+        Close
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- Modal Overlay -->
-<div id="unlockModalOverlay" class="unlock-modal-overlay" onclick="closeUnlockModal()"></div>
+<div
+  id="unlockModalOverlay"
+  class="unlock-modal-overlay"
+  onclick="closeUnlockModal()"
+></div>
 
-<style>
-    .library-container { padding: 40px 0; min-height: calc(100vh - 80px); background: linear-gradient(135deg, #FAF3E1 0%, #FAF3E1 100%); }
-    .library-header { text-align: center; margin-bottom: 50px; color: #222222; }
-    .library-header h1 { font-size: 48px; font-weight: 700; margin-bottom: 15px; text-shadow: 0 2px 10px rgba(0,0,0,0.1); color: #FA8112; display: flex; align-items: center; justify-content: center; gap: 15px; }
-    .library-header h1 i { font-size: 50px; }
-    .library-header p { font-size: 18px; opacity: 0.9; }
-    
-    /* Event Filter Styles */
-    .event-filter-section { margin-bottom: 50px; }
-    .event-filter-section h3 { font-size: 20px; font-weight: 700; color: #222222; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-    .event-filter-section h3 i { color: #FA8112; }
-    .event-filter-container { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-    .event-filter-btn { 
-        padding: 12px 24px; 
-        border-radius: 50px; 
-        background: white; 
-        color: #222222; 
-        text-decoration: none; 
-        font-weight: 600; 
-        font-size: 14px; 
-        display: flex; 
-        align-items: center; 
-        gap: 8px; 
-        /* transition removed */
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-        border: 2px solid transparent;
-        cursor: pointer;
-    }
-    .event-filter-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
-    .event-filter-btn.active { 
-        background: var(--event-color, #FA8112); 
-        color: white; 
-        box-shadow: 0 8px 25px rgba(250, 129, 18, 0.4);
-    }
-    .event-filter-btn i { font-size: 16px; }
-    
-    /* Event Section Styles */
-    .event-section { margin-bottom: 60px; }
-    .event-header { 
-        margin-bottom: 30px; 
-        padding: 30px; 
-        background: linear-gradient(135deg, var(--event-color, #FA8112) 0%, var(--event-color, #FA8112) 100%); 
-        border-radius: 15px; 
-        color: white;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-    }
-    .event-title-wrapper { display: flex; align-items: center; gap: 15px; margin-bottom: 0px; margin-top: 0px;}
-    .event-title-wrapper i { font-size: 40px; }
-    .event-header h2 { font-size: 32px; font-weight: 700; margin: 0; }
-    .event-description { font-size: 16px; opacity: 0.95; margin: 0; }
-    
-    /* Books Grid */
-    .books-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; }
-    @media (max-width: 900px) {
-        .books-grid { grid-template-columns: repeat(1, 1fr); gap: 20px; }
-    }
-    .book-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.15); /* transition removed */ }
-    .book-card:hover { transform: translateY(-10px); box-shadow: 0 15px 40px rgba(0,0,0,0.25); }
-    .book-link { text-decoration: none; color: inherit; }
-    .book-locked { position: relative; }
-    .book-locked .book-thumbnail img { filter: blur(8px); }
-    .book-locked::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(247, 244, 244, 0.1);
-        z-index: 1;
-        border-radius: 12px;
-        pointer-events: none;
-    }
-    .book-status-badge {
-        position: absolute;
-        top: 12px;
-        left: 12px;
-        z-index: 12;
-        padding: 8px 14px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        backdrop-filter: blur(10px);
-    }
-    .book-status-badge.accessible {
-        background: rgba(34, 197, 94, 0.95);
-        color: white;
-    }
-    .book-status-badge.locked {
-        background: rgba(220, 38, 38, 0.95);
-        color: white;
-    }
-    .book-status-badge i {
-        font-size: 14px;
-    }
-    .book-thumbnail { position: relative; width: 100%; padding-top: 133%; background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); overflow: hidden; }
-    .book-thumbnail img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
-    .book-placeholder { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 60px; color: #d1d5db; }
-    .book-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(250, 129, 18, 0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; opacity: 0; /* transition removed */ color: white; }
-    .book-overlay-locked { background: rgba(220, 38, 38, 0.95); }
-    .lock-content { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
-    .book-card:hover .book-overlay { opacity: 1; }
-    .book-overlay i { font-size: 40px; }
-    .book-overlay span { font-size: 18px; font-weight: 600; }
-    .btn-unlock { 
-        margin-top: 8px; 
-        padding: 10px 18px; 
-        background: white; 
-        color: #dc2626; 
-        border: none; 
-        border-radius: 8px; 
-        font-weight: 700; 
-        font-size: 14px; 
-        cursor: pointer; 
-        display: flex; 
-        align-items: center; 
-        gap: 8px; 
-        /* transition removed */
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    }
-    .btn-unlock:hover { 
-        transform: scale(1.05); 
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-    }
-    .btn-unlock i { font-size: 16px; }
-    .book-info { padding: 20px; }
-    .book-info h3 { font-size: 20px; font-weight: 700; margin-bottom: 10px; color: #333; line-height: 1.3; }
-    .book-info p { color: #666; font-size: 14px; margin-bottom: 15px; line-height: 1.5; }
-    .book-meta { display: flex; gap: 15px; flex-wrap: wrap; font-size: 13px; color: #999; }
-    .book-meta span { display: flex; align-items: center; gap: 5px; }
-    .book-meta i { color: #FA8112; }
-    
-    /* Empty State */
-    .empty-state { text-align: center; padding: 100px 20px; }
-    .empty-state i { font-size: 100px; margin-bottom: 30px; opacity: 0.3; color: #666; }
-    .empty-state h2 { font-size: 36px; margin-bottom: 15px; color: #666; }
-    .empty-state p { font-size: 18px; opacity: 0.7; color: #666; }
-    .reset-filter-link { color: #FA8112; text-decoration: none; font-weight: 600; transition: color 0.3s; }
-    .reset-filter-link:hover { color: #FF9140; }
-    
-    @media (max-width: 768px) {
-        .library-header h1 { font-size: 32px; flex-direction: column; }
-        .library-header h1 i { font-size: 36px; }
-        .library-header p { font-size: 16px; }
-        .event-filter-container { justify-content: center; }
-        .event-header { padding: 3px; }
-        .event-title-wrapper i { font-size: 32px; }
-        .event-header h2 { font-size: 24px; }
-        .books-grid { grid-template-columns: repeat(1, 1fr); gap: 20px; }
-    }
-    
-    /* Unlock Modal Styles */
-    .unlock-modal { 
-        position: fixed; 
-        top: 50%; 
-        left: 50%; 
-        transform: translate(-50%, -50%) scale(0.9); 
-        background: white; 
-        border-radius: 20px; 
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); 
-        z-index: 10001; 
-        max-width: 550px; 
-        width: 90%; 
-        max-height: 90vh; 
-        overflow-y: auto; 
-        opacity: 0; 
-        visibility: hidden; 
-        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    
-    .unlock-modal.active { 
-        opacity: 1; 
-        visibility: visible; 
-        transform: translate(-50%, -50%) scale(1);
-    }
-    
-    .unlock-modal-overlay { 
-        position: fixed; 
-        top: 0; 
-        left: 0; 
-        width: 100%; 
-        height: 100%; 
-        background: rgba(0, 0, 0, 0.5); 
-        z-index: 10000; 
-        opacity: 0; 
-        visibility: hidden; 
-        transition: all 0.3s ease;
-    }
-    
-    .unlock-modal-overlay.active { 
-        opacity: 1; 
-        visibility: visible;
-    }
-    
-    .unlock-modal-content { 
-        position: relative; 
-        padding: 40px 30px;
-    }
-    
-    .modal-close-btn { 
-        position: absolute; 
-        top: 15px; 
-        right: 15px; 
-        background: #f3f4f6; 
-        border: none; 
-        width: 40px; 
-        height: 40px; 
-        border-radius: 50%; 
-        cursor: pointer; 
-        display: flex; 
-        align-items: center; 
-        justify-content: center; 
-        font-size: 20px; 
-        color: #666; 
-        transition: all 0.3s ease;
-        z-index: 10002;
-    }
-    
-    .modal-close-btn:hover { 
-        background: #e5e7eb; 
-        color: #333; 
-        transform: rotate(90deg);
-    }
-    
-    .modal-header { 
-        text-align: center; 
-        margin-bottom: 30px; 
-        padding-bottom: 20px; 
-        border-bottom: 2px solid #f3f4f6;
-    }
-    
-    .modal-header i { 
-        font-size: 50px; 
-        color: #dc2626; 
-        margin-bottom: 15px; 
-        display: block;
-    }
-    
-    .modal-header h2 { 
-        font-size: 28px; 
-        font-weight: 700; 
-        color: #333; 
-        margin: 0 0 10px 0;
-    }
-    
-    .modal-book-title { 
-        font-size: 16px; 
-        color: #666; 
-        margin: 0; 
-        font-weight: 600;
-    }
-    
-    .unlock-form { display: flex; flex-direction: column; gap: 20px; }
-    
-    .form-group { display: flex; flex-direction: column; }
-    
-    .form-group label { 
-        font-size: 14px; 
-        font-weight: 600; 
-        color: #333; 
-        margin-bottom: 8px; 
-        display: flex; 
-        align-items: center; 
-        gap: 5px;
-    }
-    
-    .required { color: #dc2626; font-weight: 700; }
-    
-    .form-group input,
-    .form-group textarea,
-    .form-group select { 
-        padding: 12px 14px; 
-        border: 2px solid #e5e7eb; 
-        border-radius: 8px; 
-        font-size: 14px; 
-        font-family: inherit;
-        transition: all 0.3s ease;
-    }
-    
-    .form-group input:focus,
-    .form-group textarea:focus,
-    .form-group select:focus { 
-        outline: none; 
-        border-color: #FA8112; 
-        background: #fffbf7;
-        box-shadow: 0 0 0 3px rgba(250, 129, 18, 0.1);
-    }
-    
-    .form-group input::placeholder,
-    .form-group textarea::placeholder { 
-        color: #bbb;
-    }
-    
-    .form-hint { 
-        font-size: 12px; 
-        color: #999; 
-        margin-top: 4px;
-    }
-    
-    .qr-code-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 12px;
-        padding: 20px;
-        background: #f9fafb;
-        border: 2px dashed #e5e7eb;
-        border-radius: 8px;
-        text-align: center;
-    }
-    
-    .qr-code-container i {
-        font-size: 32px;
-        color: #FA8112;
-    }
-    
-    .qr-code-container p {
-        margin: 0;
-        font-size: 13px;
-        color: #666;
-        font-weight: 500;
-    }
-    
-    .qr-code-image {
-        max-width: 150px;
-        max-height: 150px;
-        border-radius: 6px;
-    }
-    
-    .form-checkbox { 
-        flex-direction: row; 
-        align-items: center; 
-        gap: 10px; 
-        margin: 15px 0;
-    }
-    
-    .form-checkbox input[type="checkbox"] { 
-        width: 18px; 
-        height: 18px; 
-        cursor: pointer; 
-        accent-color: #FA8112;
-    }
-    
-    .form-checkbox label { 
-        margin: 0; 
-        cursor: pointer; 
-        flex-direction: row;
-    }
-    
-    .form-actions { 
-        display: flex; 
-        gap: 12px; 
-        margin-top: 25px; 
-        justify-content: flex-end;
-    }
-    
-    .btn-cancel, 
-    .btn-submit { 
-        padding: 12px 24px; 
-        border: none; 
-        border-radius: 8px; 
-        font-size: 14px; 
-        font-weight: 600; 
-        cursor: pointer; 
-        display: flex; 
-        align-items: center; 
-        gap: 8px; 
-        transition: all 0.3s ease;
-    }
-    
-    .btn-cancel { 
-        background: #f3f4f6; 
-        color: #666; 
-    }
-    
-    .btn-cancel:hover { 
-        background: #e5e7eb; 
-        color: #333;
-    }
-    
-    .btn-submit { 
-        background: linear-gradient(135deg, #FA8112 0%, #FF9140 100%); 
-        color: white;
-        box-shadow: 0 4px 15px rgba(250, 129, 18, 0.3);
-    }
-    
-    .btn-submit:hover { 
-        transform: translateY(-2px); 
-        box-shadow: 0 6px 20px rgba(250, 129, 18, 0.4);
-    }
-    
-    .btn-submit:active { 
-        transform: translateY(0);
-    }
-    
-    .success-message { 
-        text-align: center; 
-        padding: 30px 20px;
-    }
-    
-    .success-message i { 
-        font-size: 60px; 
-        color: #10b981; 
-        margin-bottom: 15px; 
-        display: block;
-    }
-    
-    .success-message h3 { 
-        font-size: 24px; 
-        font-weight: 700; 
-        color: #333; 
-        margin: 0 0 10px 0;
-    }
-    
-    .success-message p { 
-        font-size: 14px; 
-        color: #666; 
-        margin: 8px 0; 
-        line-height: 1.6;
-    }
-    
-    .btn-close-success { 
-        margin-top: 20px; 
-        padding: 12px 30px; 
-        background: #10b981; 
-        color: white; 
-        border: none; 
-        border-radius: 8px; 
-        font-weight: 600; 
-        cursor: pointer; 
-        transition: all 0.3s ease;
-    }
-    
-    .btn-close-success:hover { 
-        background: #059669;
-    }
-    
-    /* Responsive Modal */
-    @media (max-width: 768px) {
-        .unlock-modal { 
-            max-width: 95%; 
-            width: 95%; 
-        }
-        .unlock-modal-content { 
-            padding: 30px 20px;
-        }
-        .modal-header h2 { 
-            font-size: 24px;
-        }
-        .form-actions { 
-            flex-direction: column;
-        }
-        .btn-cancel,
-        .btn-submit { 
-            width: 100%;
-        }
-    }
-</style>
-
+{% block extra_js %}
 <script>
-    function openUnlockModal(bookId, bookTitle) {
-        // Set book info
-        document.getElementById('bookId').value = bookId;
-        document.getElementById('bookTitle').textContent = bookTitle;
-        
-        // Reset form
-        document.getElementById('unlockForm').reset();
-        document.getElementById('successMessage').style.display = 'none';
-        document.getElementById('unlockForm').style.display = 'flex';
-        
-        // Show modal
-        document.getElementById('unlockModal').classList.add('active');
-        document.getElementById('unlockModalOverlay').classList.add('active');
-        
-        // Prevent body scroll
-        document.body.style.overflow = 'hidden';
+  function openUnlockModal(bookId, bookTitle) {
+    document.getElementById("bookId").value = bookId;
+    document.getElementById("bookTitle").textContent = bookTitle;
+    document.getElementById("unlockForm").reset();
+    document.getElementById("successMessage").style.display = "none";
+    document.getElementById("unlockForm").style.display = "flex";
+    document.getElementById("unlockModal").classList.add("active");
+    document.getElementById("unlockModalOverlay").classList.add("active");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeUnlockModal() {
+    document.getElementById("unlockModal").classList.remove("active");
+    document.getElementById("unlockModalOverlay").classList.remove("active");
+    document.body.style.overflow = "auto";
+    isSubmitting = false; // Reset submission flag when modal is closed
+  }
+
+  let isSubmitting = false; // Flag to prevent double submission
+
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") {
+      closeUnlockModal();
     }
+  });
+
+  document.getElementById("unlockForm").addEventListener("submit", function (e) {
+    e.preventDefault();
     
-    function closeUnlockModal() {
-        document.getElementById('unlockModal').classList.remove('active');
-        document.getElementById('unlockModalOverlay').classList.remove('active');
-        document.body.style.overflow = 'auto';
+    // Prevent double submission
+    if (isSubmitting) {
+      return;
     }
-    
-    // Close modal on Escape key
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
+    isSubmitting = true;
+
+    const formData = {
+      book_id: document.getElementById("bookId").value,
+      candidate_full_name: document.getElementById("candidateFullName").value,
+      date_of_birth: document.getElementById("dateOfBirth").value,
+      parents_mobile_number: document.getElementById("parentsMobileNumber").value,
+      marital_status: document.getElementById("maritalStatus").value,
+      payment_screenshot: document.getElementById("paymentScreenshot").files[0],
+      terms_agreed: document.getElementById("terms").checked,
+    };
+    if (!formData.candidate_full_name.trim()) {
+      alert("Please enter candidate full name");
+      isSubmitting = false;
+      return;
+    }
+    if (!formData.date_of_birth) {
+      alert("Please select date of birth");
+      isSubmitting = false;
+      return;
+    }
+    if (!formData.parents_mobile_number.trim()) {
+      alert("Please enter parents mobile number");
+      isSubmitting = false;
+      return;
+    }
+    if (!formData.marital_status) {
+      alert("Please select marital status");
+      isSubmitting = false;
+      return;
+    }
+    if (!formData.payment_screenshot) {
+      alert("Please upload payment screenshot");
+      isSubmitting = false;
+      return;
+    }
+    if (!formData.terms_agreed) {
+      alert("Please accept the terms and conditions");
+      isSubmitting = false;
+    }
+    const postData = new FormData();
+    postData.append("flipbook", formData.book_id);
+    postData.append("candidate_full_name", formData.candidate_full_name);
+    postData.append("date_of_birth", formData.date_of_birth);
+    postData.append("parents_mobile_number", formData.parents_mobile_number);
+    postData.append("marital_status", formData.marital_status);
+    postData.append("payment_screenshot", formData.payment_screenshot);
+    postData.append("terms_accepted", formData.terms_agreed ? "on" : "");
+    fetch("/unlock-request/", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": getCookie("csrftoken"),
+      },
+      body: postData,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        isSubmitting = false; // Reset flag after response
+        if (data.success) {
+          document.getElementById("unlockForm").style.display = "none";
+          document.getElementById("successMessage").style.display = "flex";
+          document.getElementById("successMessage").style.flexDirection = "column";
+          setTimeout(() => {
             closeUnlockModal();
+          }, 3000); // Close modal after 3 seconds
+        } else {
+          let errorMsg = "Request failed.";
+          if (data.errors) {
+            errorMsg = Object.values(data.errors).map((e) => e.join(" ")).join(" ");
+          } else if (data.error) {
+            errorMsg = data.error;
+          }
+          alert(errorMsg);
         }
-    });
-    
-    // Handle form submission
-    document.getElementById('unlockForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Collect form data
-        const formData = {
-            book_id: document.getElementById('bookId').value,
-            candidate_full_name: document.getElementById('candidateFullName').value,
-            date_of_birth: document.getElementById('dateOfBirth').value,
-            parents_mobile_number: document.getElementById('parentsMobileNumber').value,
-            marital_status: document.getElementById('maritalStatus').value,
-            payment_screenshot: document.getElementById('paymentScreenshot').files[0],
-            terms_agreed: document.getElementById('terms').checked,
-        };
-        
-        // Validate all required fields
-        if (!formData.candidate_full_name.trim()) {
-            alert('Please enter candidate full name');
-            return;
-        }
-        if (!formData.date_of_birth) {
-            alert('Please select date of birth');
-            return;
-        }
-        if (!formData.parents_mobile_number.trim()) {
-            alert('Please enter parents mobile number');
-            return;
-        }
-        if (!formData.marital_status) {
-            alert('Please select marital status');
-            return;
-        }
-        if (!formData.payment_screenshot) {
-            alert('Please upload payment screenshot');
-            return;
-        }
-        if (!formData.terms_agreed) {
-            alert('Please accept the terms and conditions');
-            return;
-        }
-        
-        // Prepare form data for POST
-        const postData = new FormData();
-        postData.append('flipbook', formData.book_id);
-        postData.append('candidate_full_name', formData.candidate_full_name);
-        postData.append('date_of_birth', formData.date_of_birth);
-        postData.append('parents_mobile_number', formData.parents_mobile_number);
-        postData.append('marital_status', formData.marital_status);
-        postData.append('payment_screenshot', formData.payment_screenshot);
-        postData.append('terms_accepted', formData.terms_agreed ? 'on' : '');
+      })
+      .catch((err) => {
+        isSubmitting = false; // Reset flag on error
+        console.error("Error:", err);
+        alert("An error occurred. Please try again.");
+      });
+  });
 
-        fetch('/unlock-request/', {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
-            },
-            body: postData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById('unlockForm').style.display = 'none';
-                document.getElementById('successMessage').style.display = 'flex';
-                document.getElementById('successMessage').style.flexDirection = 'column';
-            } else {
-                let errorMsg = 'Request failed.';
-                if (data.errors) {
-                    errorMsg = Object.values(data.errors).map(e => e.join(' ')).join(' ');
-                } else if (data.error) {
-                    errorMsg = data.error;
-                }
-                alert(errorMsg);
-            }
-        })
-        .catch(err => {
-            console.error('Error:', err);
-            alert('An error occurred. Please try again.');
-        });
-    });
-    
-    // Helper function to get CSRF token (when backend is ready)
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === name + "=") {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
         }
-        return cookieValue;
+      }
     }
-</script>
+    return cookieValue;
+  }
 
+  // Existing filter/category/event JS from before
+  function toggleEventSubcategories(event, eventId) {
+    event.preventDefault();
+    const button = event.currentTarget;
+    const subcatDiv = document.getElementById('event-subcat-' + eventId);
+    const allEventSubcats = document.querySelectorAll('[id^="event-subcat-"]');
+    const allEventButtons = document.querySelectorAll('.category-collapse-toggle');
+    allEventSubcats.forEach(subcat => {
+      if (subcat.id !== 'event-subcat-' + eventId) {
+        subcat.classList.remove('show');
+      }
+    });
+    allEventButtons.forEach(btn => {
+      if (btn !== button) {
+        btn.classList.remove('active');
+      }
+    });
+    subcatDiv.classList.toggle('show');
+    if (subcatDiv.classList.contains('show')) {
+      button.classList.add('active');
+    } else {
+      button.classList.remove('active');
+    }
+  }
+  function toggleCategorySubcategories(event, categoryId) {
+    event.preventDefault();
+    const button = event.currentTarget;
+    const subcatDiv = document.getElementById('subcat-' + categoryId);
+    const allSubcats = document.querySelectorAll('[id^="subcat-"]');
+    const allButtons = document.querySelectorAll('.category-collapse-toggle');
+    allSubcats.forEach(subcat => {
+      if (subcat.id !== 'subcat-' + categoryId) {
+        subcat.classList.remove('show');
+      }
+    });
+    allButtons.forEach(btn => {
+      if (btn !== button) {
+        btn.classList.remove('active');
+      }
+    });
+    subcatDiv.classList.toggle('show');
+    if (subcatDiv.classList.contains('show')) {
+      button.classList.add('active');
+    } else {
+      button.classList.remove('active');
+    }
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+    const selectedEventId = '{{ selected_event }}';
+    const selectedCategoryId = '{{ selected_category }}';
+    if (selectedEventId) {
+      const eventSubcatDiv = document.getElementById('event-subcat-' + selectedEventId);
+      if (eventSubcatDiv) {
+        eventSubcatDiv.classList.add('show');
+        const button = eventSubcatDiv.previousElementSibling;
+        if (button) {
+          button.classList.add('active');
+        }
+      }
+    }
+    if (selectedCategoryId) {
+      const subcatDiv = document.getElementById('subcat-' + selectedCategoryId);
+      if (subcatDiv) {
+        subcatDiv.classList.add('show');
+        const button = subcatDiv.previousElementSibling;
+        if (button) {
+          button.classList.add('active');
+        }
+      }
+    }
+  });
+</script>
+{% endblock %}
 {% endblock %}

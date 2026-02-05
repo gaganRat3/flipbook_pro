@@ -6,7 +6,7 @@ from .forms import UsernameMobileAuthenticationForm
 from django.contrib.auth.models import User
 from django.contrib import messages
 import json
-from .models import FlipBook, BookView, Event, FlipBookAccess, UserProfile
+from .models import FlipBook, BookView, Event, FlipBookAccess, UserProfile, UnlockRequest
 
 
 def get_client_ip(request):
@@ -102,6 +102,13 @@ def home_view(request):
     elif selected_gender == 'boy':
         books = books.filter(title__icontains='boy')
 
+    # Mela type filter (shows when event is selected)
+    selected_mela_type = request.GET.get('mela_type', None)
+    if selected_mela_type == 'boys':
+        books = books.filter(title__icontains='boy')
+    elif selected_mela_type == 'girls':
+        books = books.filter(title__icontains='girl')
+
     # Category sub-filter
     selected_category = request.GET.get('category', None)
     if selected_category:
@@ -116,7 +123,6 @@ def home_view(request):
         'Gujarat Girls',
         'Saurashtra Girls',
         'Mumbai Mah Rest of India (MMR) Girls',
-        'Doctor Girls',
         'Divorce & Widow Girls',
     ]
     boy_categories = [
@@ -124,8 +130,16 @@ def home_view(request):
         'Gujarat Boys',
         'Saurashtra Boys',
         'Mumbai Mah Rest of India (MMR) Boys',
-        'Doctor Boys',
         'Divorce & Widow Boys',
+    ]
+
+    # Categories for filtering
+    categories = [
+        {'id': 'nri', 'name': 'NRI'},
+        {'id': 'gujarat', 'name': 'Gujarat'},
+        {'id': 'saurashtra', 'name': 'Saurashtra'},
+        {'id': 'mumbai', 'name': 'Mumbai MMR'},
+        {'id': 'divorce-widow', 'name': 'Divorce & Widow'},
     ]
 
     context = {
@@ -133,12 +147,14 @@ def home_view(request):
         'events': events,
         'selected_event': selected_event,
         'selected_gender': selected_gender,
+        'selected_mela_type': selected_mela_type,
         'selected_category': selected_category,
         'accessible_ids': accessible_ids,
         'my_books_filter': my_books_filter,
         'show_sammelan': show_sammelan,
         'girl_categories': girl_categories,
         'boy_categories': boy_categories,
+        'categories': categories,
     }
     return render(request, 'books/home.html', context)
 
@@ -181,15 +197,75 @@ from .forms import UnlockRequestForm
 @csrf_exempt  # If you use AJAX, ensure CSRF token is handled in JS; otherwise, remove this and use @require_POST
 def unlock_request_view(request):
     if request.method == 'POST':
-        data = request.POST.copy()
-        files = request.FILES.copy()
-        form = UnlockRequestForm(data, files)
-        if form.is_valid():
-            unlock_request = form.save(commit=False)
-            if request.user.is_authenticated:
-                unlock_request.user = request.user
-            unlock_request.save()
-            return JsonResponse({'success': True, 'message': 'Request submitted successfully.'})
-        else:
-            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+        try:
+            data = request.POST.copy()
+            files = request.FILES.copy()
+            form = UnlockRequestForm(data, files)
+            if form.is_valid():
+                flipbook = form.cleaned_data['flipbook']
+                candidate_full_name = form.cleaned_data['candidate_full_name']
+                date_of_birth = form.cleaned_data['date_of_birth']
+                parents_mobile_number = form.cleaned_data['parents_mobile_number']
+                marital_status = form.cleaned_data['marital_status']
+
+                # Check for existing request (customize fields as needed)
+                existing = UnlockRequest.objects.filter(
+                    flipbook=flipbook,
+                    candidate_full_name=candidate_full_name,
+                    date_of_birth=date_of_birth,
+                    parents_mobile_number=parents_mobile_number,
+                    marital_status=marital_status,
+                )
+                if request.user.is_authenticated:
+                    existing = existing.filter(user=request.user)
+
+                if existing.exists():
+                    return JsonResponse({'success': False, 'error': 'A request with these details already exists.'}, status=400)
+
+                unlock_request = form.save(commit=False)
+                if request.user.is_authenticated:
+                    unlock_request.user = request.user
+                unlock_request.save()
+                return JsonResponse({'success': True, 'message': 'Request submitted successfully.'})
+            else:
+                return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+        except Exception as e:
+            import traceback
+            return JsonResponse({'success': False, 'error': str(e), 'traceback': traceback.format_exc()}, status=500)
     return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)
+
+
+@login_required
+def debug_access_view(request):
+    """Debug view to check user's flipbook access (staff only)"""
+    if not request.user.is_staff:
+        return redirect('home')
+    
+    # Get all users and their access
+    users = User.objects.filter(is_active=True).exclude(is_superuser=True)
+    flipbooks = FlipBook.objects.filter(is_published=True)
+    
+    data = []
+    for user in users:
+        accessible = FlipBookAccess.objects.filter(user=user).values_list('flipbook__title', flat=True)
+        data.append({
+            'username': user.username,
+            'email': user.email,
+            'access_count': len(accessible),
+            'books': list(accessible) if accessible else ['(no access)']
+        })
+    
+    html = '<h1>User FlipBook Access Debug</h1>'
+    html += '<style>table { border-collapse: collapse; width: 100%; margin: 20px 0; } th, td { border: 1px solid #ddd; padding: 10px; text-align: left; } th { background-color: #f0f0f0; font-weight: bold; } tr:nth-child(even) { background-color: #f9f9f9; }</style>'
+    html += '<table><tr><th>Username</th><th>Email</th><th>Access Count</th><th>Books</th></tr>'
+    
+    for item in data:
+        html += f'<tr><td>{item["username"]}</td><td>{item["email"]}</td><td>{item["access_count"]}</td><td>{", ".join(item["books"])}</td></tr>'
+    
+    html += '</table>'
+    html += f'<p><strong>Total Users:</strong> {len(data)}</p>'
+    html += f'<p><strong>Total FlipBooks:</strong> {flipbooks.count()}</p>'
+    html += f'<p><a href="/admin/books/flipbookaccess/user-access/">Go to Access Manager →</a></p>'
+    
+    from django.http import HttpResponse
+    return HttpResponse(html)
