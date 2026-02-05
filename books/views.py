@@ -193,6 +193,7 @@ def flipbook_view(request, book_id):
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from .forms import UnlockRequestForm
+from datetime import datetime
 
 @csrf_exempt  # If you use AJAX, ensure CSRF token is handled in JS; otherwise, remove this and use @require_POST
 def unlock_request_view(request):
@@ -200,6 +201,10 @@ def unlock_request_view(request):
         try:
             data = request.POST.copy()
             files = request.FILES.copy()
+            
+            # Debug: Log the received date
+            print(f"Received date_of_birth: {data.get('date_of_birth')}")
+            
             form = UnlockRequestForm(data, files)
             if form.is_valid():
                 flipbook = form.cleaned_data['flipbook']
@@ -228,9 +233,12 @@ def unlock_request_view(request):
                 unlock_request.save()
                 return JsonResponse({'success': True, 'message': 'Request submitted successfully.'})
             else:
+                print(f"Form errors: {form.errors}")
                 return JsonResponse({'success': False, 'errors': form.errors}, status=400)
         except Exception as e:
             import traceback
+            print(f"Exception in unlock_request_view: {str(e)}")
+            traceback.print_exc()
             return JsonResponse({'success': False, 'error': str(e), 'traceback': traceback.format_exc()}, status=500)
     return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)
 

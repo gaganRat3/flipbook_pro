@@ -1054,7 +1054,7 @@
               onclick="toggleEventSubcategories(event, '{{ event.id }}')"
               style="width: 100%; border-color: {{ event.color }}; color: {{ event.color }};"
             >
-              <i class="{{ event.icon }}"></i> {{ event.name }}
+              <i class=""></i> {{ event.name }}
             </button>
             <div class="category-subcategories" id="event-subcat-{{ event.id }}">
               {% comment %} <a
@@ -1347,8 +1347,20 @@
         <label for="dateOfBirth"
           >Date of Birth <span class="required">*</span></label
         >
-        <input type="date" id="dateOfBirth" name="date_of_birth" required />
-        <small class="form-hint">Your date of birth</small>
+        <input 
+          type="text" 
+          id="dateOfBirth" 
+          name="date_of_birth" 
+          placeholder="dd-mm-yyyy" 
+          required 
+          maxlength="10"
+          oninput="formatDateInput(this)"
+          onchange="calculateAge()"
+        />
+        <small class="form-hint">Your date of birth (dd-mm-yyyy)</small>
+        <div id="ageDisplay" style="margin-top: 8px; display: none; font-weight: 600; color: #667eea; font-size: 14px;">
+          Age: <span id="ageValue">0</span> years
+        </div>
       </div>
 
       <div class="form-group">
@@ -1461,12 +1473,94 @@
 
 {% block extra_js %}
 <script>
+  // Function to convert date from dd-mm-yyyy to yyyy-mm-dd
+  function convertDateFormat(dateStr) {
+    if (!dateStr || dateStr.trim() === "") {
+      return "";
+    }
+    const parts = dateStr.split("-");
+    if (parts.length !== 3) {
+      console.error("Invalid date format:", dateStr);
+      return dateStr;
+    }
+    const day = parts[0].padStart(2, '0');
+    const month = parts[1].padStart(2, '0');
+    const year = parts[2];
+    const converted = year + "-" + month + "-" + day;
+    console.log("Date conversion: " + dateStr + " -> " + converted);
+    return converted;
+  }
+
+  // Function to format date input as user types (dd-mm-yyyy)
+  function formatDateInput(input) {
+    let value = input.value.replace(/\D/g, ""); // Remove all non-digits
+    
+    if (value.length > 0) {
+      if (value.length <= 2) {
+        input.value = value;
+      } else if (value.length <= 4) {
+        input.value = value.slice(0, 2) + "-" + value.slice(2);
+      } else {
+        input.value = value.slice(0, 2) + "-" + value.slice(2, 4) + "-" + value.slice(4, 8);
+      }
+    }
+  }
+
+  // Function to calculate age from date of birth
+  function calculateAge() {
+    const dobInput = document.getElementById("dateOfBirth").value;
+    const ageDisplay = document.getElementById("ageDisplay");
+    const ageValue = document.getElementById("ageValue");
+    
+    if (!dobInput || dobInput.trim() === "") {
+      ageDisplay.style.display = "none";
+      return;
+    }
+    
+    // Parse date in dd-mm-yyyy format
+    const parts = dobInput.split("-");
+    if (parts.length !== 3) {
+      ageDisplay.style.display = "none";
+      return;
+    }
+    
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10);
+    const year = parseInt(parts[2], 10);
+    
+    // Validate date
+    if (isNaN(day) || isNaN(month) || isNaN(year) || day < 1 || day > 31 || month < 1 || month > 12 || year < 1900) {
+      ageDisplay.style.display = "none";
+      return;
+    }
+    
+    const dob = new Date(year, month - 1, day);
+    const today = new Date();
+    
+    // Check if date is valid
+    if (dob > today) {
+      ageDisplay.style.display = "none";
+      return;
+    }
+    
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+      age--;
+    }
+    
+    ageValue.textContent = age;
+    ageDisplay.style.display = "block";
+  }
+
   function openUnlockModal(bookId, bookTitle) {
     document.getElementById("bookId").value = bookId;
     document.getElementById("bookTitle").textContent = bookTitle;
     document.getElementById("unlockForm").reset();
     document.getElementById("successMessage").style.display = "none";
     document.getElementById("unlockForm").style.display = "flex";
+    document.getElementById("ageDisplay").style.display = "none";
     document.getElementById("unlockModal").classList.add("active");
     document.getElementById("unlockModalOverlay").classList.add("active");
     document.body.style.overflow = "hidden";
@@ -1515,6 +1609,15 @@
       isSubmitting = false;
       return;
     }
+    
+    // Validate date format before conversion
+    const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
+    if (!dateRegex.test(formData.date_of_birth)) {
+      alert("Please enter a valid date in format dd-mm-yyyy");
+      isSubmitting = false;
+      return;
+    }
+    
     if (!formData.parents_mobile_number.trim()) {
       alert("Please enter parents mobile number");
       isSubmitting = false;
@@ -1534,10 +1637,14 @@
       alert("Please accept the terms and conditions");
       isSubmitting = false;
     }
+    
+    // Convert date format from dd-mm-yyyy to yyyy-mm-dd
+    const dateFormatted = convertDateFormat(formData.date_of_birth);
+    
     const postData = new FormData();
     postData.append("flipbook", formData.book_id);
     postData.append("candidate_full_name", formData.candidate_full_name);
-    postData.append("date_of_birth", formData.date_of_birth);
+    postData.append("date_of_birth", dateFormatted);
     postData.append("parents_mobile_number", formData.parents_mobile_number);
     postData.append("marital_status", formData.marital_status);
     postData.append("payment_screenshot", formData.payment_screenshot);
