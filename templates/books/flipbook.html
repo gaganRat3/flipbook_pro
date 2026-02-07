@@ -128,12 +128,86 @@
         .zoom-controls .control-btn { display: inline-flex; }
         .fullscreen-btn { margin-left: 3px; padding-left: 3px; }
     }
+
+    /* ===== SECURITY PROTECTIONS ===== */
+    /* 1) TAB FOCUS BLUR PROTECTION */
+    .security-overlay { 
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+        background: rgba(0, 0, 0, 0.8); display: none; z-index: 99999; 
+        align-items: center; justify-content: center; 
+        backdrop-filter: blur(8px); animation: fadeIn 0.3s ease;
+    }
+    .security-overlay.active { display: flex; }
+    .security-overlay-content { 
+        background: white; padding: 40px; border-radius: 12px; 
+        text-align: center; max-width: 450px; 
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    .security-overlay-icon { font-size: 48px; margin-bottom: 15px; color: #ef4444; }
+    .security-overlay-title { font-size: 22px; font-weight: 700; color: #1f2937; margin-bottom: 10px; }
+    .security-overlay-message { font-size: 14px; color: #6b7280; line-height: 1.5; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* Tab blur filter on content */
+    .flipbook-viewer.is-blurred { filter: blur(12px); pointer-events: none; }
+
+    /* 2) ZOOM HARDENING WARNING */
+    .zoom-warning { 
+        position: fixed; top: 100px; left: 50%; transform: translateX(-50%); 
+        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); 
+        color: #78350f; padding: 12px 20px; border-radius: 8px; 
+        box-shadow: 0 8px 20px rgba(251, 191, 36, 0.4); 
+        z-index: 9999; display: none; font-weight: 600; font-size: 14px;
+        animation: slideDown 0.4s ease;
+    }
+    .zoom-warning.show { display: flex; gap: 10px; align-items: center; }
+    @keyframes slideDown { from { transform: translateX(-50%) translateY(-30px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
+
+    /* Subtle blur when high zoom detected */
+    .flipbook-viewer.zoom-blurred #flipbook .page img { 
+        filter: blur(1.2px); 
+        opacity: 0.98;
+    }
+
+    /* 3) ANTI-OCR NOISE OVERLAY - invisible to human eye */
+    #flipbook .page { position: relative; }
+    #flipbook .page::after { 
+        content: ''; 
+        position: absolute; top: 0; left: 0; 
+        width: 100%; height: 100%; 
+        background-image: url("data:image/svg+xml,%3Csvg width='64' height='64' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' result='noise'/%3E%3CfeColorMatrix in='noise' type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='64' height='64' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E"); 
+        background-size: 128px 128px;
+        pointer-events: none; 
+        z-index: 5;
+        mix-blend-mode: overlay;
+    }
+    /* Randomize noise position per page */
+    #flipbook .page:nth-child(odd)::after { background-position: 0 0; }
+    #flipbook .page:nth-child(4n)::after { background-position: 12px 8px; }
+    #flipbook .page:nth-child(3n)::after { background-position: 8px 12px; }
 </style>
 {% endblock %}
 
 {% block content %}
 
-<div class="flipbook-viewer">
+<!-- SECURITY: Overlay shown when tab loses focus -->
+<div class="security-overlay" id="securityOverlay">
+    <div class="security-overlay-content">
+        <div class="security-overlay-icon"><i class="fas fa-lock"></i></div>
+        <div class="security-overlay-title">Content Protected</div>
+        <div class="security-overlay-message">
+            This document is hidden when you switch tabs to prevent unauthorized viewing.
+        </div>
+    </div>
+</div>
+
+<!-- SECURITY: Warning banner for high zoom -->
+<div class="zoom-warning" id="zoomWarning">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span>High zoom detected - content protection activated</span>
+</div>
+
+<div class="flipbook-viewer" id="flipbookViewer">
     <div class="viewer-header">
         <a href="{% url 'home' %}" class="viewer-back"><i class="fas fa-arrow-left"></i> Back to Library</a>
         <div class="viewer-title">{{ book.title }}</div>
@@ -251,6 +325,197 @@ $(document).ready(function() {
         pages = [];
     }
     const loadedPages = new Set();
+    
+    // ===== SECURITY PROTECTIONS MODULE =====
+    // Comprehensive content protection system for secure PDF viewing
+    
+    const SecurityManager = {
+        config: {
+            tabFocusProtection: true,      // Blur when tab loses focus
+            zoomHardeningEnabled: true,    // Protect against zoom screenshots
+            zoomThreshold: 1.25,           // Trigger blur at 125% zoom (1.25 DPR)
+            antiOCREnabled: true,          // Noise overlay (CSS-based)
+            enableConsoleLogging: true,    // Log security events
+        },
+
+        /**
+         * 1) TAB FOCUS BLUR PROTECTION
+         * Detects when user switches tabs or window loses focus
+         * Uses: document.visibilitychange, window.blur, window.focus events
+         * Action: Applies blur filter + shows security overlay
+         */
+        initTabFocusProtection() {
+            if (!this.config.tabFocusProtection) return;
+
+            // Detect visibility change (tab switch, window minimize)
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    this.activateBlur('Tab switched - content blurred');
+                } else {
+                    this.deactivateBlur('Tab refocused - content visible');
+                }
+            });
+
+            // Detect window blur (click to another app)
+            window.addEventListener('blur', () => {
+                this.activateBlur('Window lost focus - content blurred');
+            });
+
+            // Detect window focus (return to app)
+            window.addEventListener('focus', () => {
+                if (!document.hidden) {
+                    this.deactivateBlur('Window refocused - content visible');
+                }
+            });
+        },
+
+        activateBlur(event) {
+            const viewer = $('#flipbookViewer');
+            const overlay = $('#securityOverlay');
+            
+            viewer.addClass('is-blurred');
+            overlay.addClass('active');
+            
+            if (this.config.enableConsoleLogging) {
+                console.warn('🔐 SECURITY:', event);
+            }
+        },
+
+        deactivateBlur(event) {
+            const viewer = $('#flipbookViewer');
+            const overlay = $('#securityOverlay');
+            
+            viewer.removeClass('is-blurred');
+            overlay.removeClass('active');
+            
+            if (this.config.enableConsoleLogging) {
+                console.log('✓', event);
+            }
+        },
+
+        /**
+         * 2) ZOOM HARDENING
+         * Monitors screen zoom level (window.devicePixelRatio)
+         * Prevents high-quality cropped screenshots via zoom
+         * Triggers blur overlay when zoom exceeds safe threshold
+         * Applies to: Browser zoom (Ctrl+Scroll), System zoom, Display scaling
+         */
+        lastDPR: window.devicePixelRatio,
+
+        initZoomHardening() {
+            if (!this.config.zoomHardeningEnabled) return;
+
+            // Check zoom on every resize event
+            window.addEventListener('resize', () => this.checkZoomLevel());
+
+            // Check zoom on keyboard zoom shortcut (Ctrl/Cmd + Scroll)
+            document.addEventListener('wheel', (e) => {
+                if (e.ctrlKey || e.metaKey) {
+                    setTimeout(() => this.checkZoomLevel(), 50);
+                }
+            }, { passive: true });
+
+            // Check zoom on keyboard shortcuts (Ctrl +/-)
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '-' || e.key === '0')) {
+                    setTimeout(() => this.checkZoomLevel(), 50);
+                }
+            });
+
+            // Initial check
+            this.checkZoomLevel();
+        },
+
+        checkZoomLevel() {
+            const currentDPR = window.devicePixelRatio;
+            
+            // Detect significant zoom changes
+            if (Math.abs(currentDPR - this.lastDPR) > 0.05) {
+                this.lastDPR = currentDPR;
+                
+                if (currentDPR > this.config.zoomThreshold) {
+                    this.activateZoomProtection(currentDPR);
+                } else {
+                    this.deactivateZoomProtection();
+                }
+            }
+        },
+
+        activateZoomProtection(dprLevel) {
+            const viewer = $('#flipbookViewer');
+            const warning = $('#zoomWarning');
+            
+            viewer.addClass('zoom-blurred');
+            warning.addClass('show');
+            
+            if (this.config.enableConsoleLogging) {
+                console.warn(`⚠️ SECURITY: High zoom detected (${Math.round(dprLevel * 100)}%) - blur applied`);
+            }
+        },
+
+        deactivateZoomProtection() {
+            const viewer = $('#flipbookViewer');
+            const warning = $('#zoomWarning');
+            
+            viewer.removeClass('zoom-blurred');
+            warning.removeClass('show');
+        },
+
+        /**
+         * 3) ANTI-OCR NOISE OVERLAY
+         * Adds imperceptible noise texture overlay to all pages
+         * Uses SVG-based fractal noise with 0.035 opacity
+         * Implemented via CSS ::after pseudo-elements
+         * Position randomized per page: odd, 4n, 3n patterns
+         * Reduces OCR (Optical Character Recognition) effectiveness
+         * Invisible to human eyes (opacity < 0.05)
+         */
+        initAntiOCR() {
+            if (!this.config.antiOCREnabled) return;
+            // Noise is purely CSS-based - no JS needed
+            // See CSS for #flipbook .page::after implementation
+            if (this.config.enableConsoleLogging) {
+                console.log('✓ SECURITY: Anti-OCR noise overlay active');
+            }
+        },
+
+        /**
+         * Initialize all security protections
+         */
+        init() {
+            this.initTabFocusProtection();
+            this.initZoomHardening();
+            this.initAntiOCR();
+            
+            if (this.config.enableConsoleLogging) {
+                console.log('🔒 All security protections initialized');
+            }
+        }
+    };
+
+    // Initialize security protections
+    SecurityManager.init();
+
+    /**
+     * ADDITIONAL PROTECTIONS
+     */
+    
+    // Disable right-click context menu
+    document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable text selection on flipbook
+    $('#flipbook').css({
+        'user-select': 'none',
+        '-webkit-user-select': 'none',
+        '-moz-user-select': 'none',
+        '-ms-user-select': 'none'
+    });
+
+    // ===== END SECURITY PROTECTIONS =====
+    
     // Preload page images
     function loadPage(pageNum) {
         if (loadedPages.has(pageNum) || pageNum < 1 || pageNum > totalPages) return;
