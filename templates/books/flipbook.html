@@ -15,19 +15,64 @@
     .viewer-title { font-size: 18px; font-weight: 600; color: #333; }
     .viewer-back { text-decoration: none; color: #2c53fd; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: color 0.3s; }
     .viewer-back:hover { color: #0cb3e6; }
-    .viewer-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 20px; overflow-y: auto; overflow-x: hidden; position: relative; width: 100%; background: #FAF3E1; }
-    .flipbook-container { position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; flex-shrink: 0; overflow: visible; }
+    .viewer-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 20px; overflow-y: auto; overflow-x: auto; position: relative; width: 100%; background: #FAF3E1; }
+        .flipbook-container {
+            width: 800px;
+            height: 600px;
+            overflow: auto;
+            position: relative;
+            display: block;
+            margin-bottom: 20px;
+            flex-shrink: 0;
+            max-width: 100%;
+            max-height: 80vh;
+        }
+
+        @media (max-width: 900px) {
+            .flipbook-container {
+                width: 98vw;
+                height: 60vw;
+                min-height: 300px;
+                max-height: 70vh;
+            }
+        }
+        @media (max-width: 600px) {
+            .flipbook-container {
+                width: 99vw;
+                height: 60vw;
+                min-height: 200px;
+                max-height: 60vh;
+            }
+        }
+
+        /* Hide scrollbars for all browsers */
+        .flipbook-container::-webkit-scrollbar { display: none; }
+        .flipbook-container { -ms-overflow-style: none; scrollbar-width: none; }
     #flipbook { margin: 0 auto; }
     #flipbook .page { background: white; box-shadow: 0 0 20px rgba(0, 0, 0, 0.2); }
-    #flipbook .page img { width: 100%; height: 73%; object-fit: contain; display: block; image-rendering: crisp-edges; image-rendering: -webkit-optimize-contrast; }
+    #flipbook .page {
+        overflow: auto !important;
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+    }
+    #flipbook .page img {
+        width: auto;
+        height: auto;
+        max-width: none;
+        max-height: none;
+        display: block;
+        image-rendering: crisp-edges;
+        image-rendering: -webkit-optimize-contrast;
+    }
     /* Side Navigation Buttons */
-    .side-nav-btn { position: absolute; top: 50%; transform: translateY(-50%); background: linear-gradient(135deg, #125bfa4d 0%, #4083ff4d 100%); border: none; color: white; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 5px 20px rgba(18, 91, 250, 0.3); z-index: 100; }
-    .side-nav-btn:hover:not(:disabled) { background: linear-gradient(135deg, #0d48a19f 0%, #2566e848 100%); transform: translateY(-50%) scale(1.1); }
+    .side-nav-btn { position: absolute; top: 50%; transform: translateY(-50%); background: linear-gradient(135deg, #f5f105f6 0%, #faea08ef 100%); border: none; color: black; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 5px 20px rgba(246, 250, 18, 0.97); z-index: 100; }
+    .side-nav-btn:hover:not(:disabled) { background: linear-gradient(135deg, #eccb12 0%, #f3f70be7 100%); transform: translateY(-50%) scale(1.1); }
     .side-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
     #prev-side-btn { position: fixed; left: 20px; }
     #next-side-btn { position: fixed; right: 20px; }
     .controls { position: relative; bottom: auto; left: auto; transform: none; background: linear-gradient(135deg, #125bfa 0%, #4083ff 100%); backdrop-filter: blur(10px); padding: 15px 25px; border-radius: 50px; display: flex; gap: 15px; align-items: center; box-shadow: 0 5px 30px rgba(250, 129, 18, 0.3); z-index: 9999; margin-bottom: 30px; flex-shrink: 0; }
-    .control-btn { background: rgba(255, 255, 255, 0.1); border: none; color: white; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .control-btn { background: rgba(245, 210, 11, 0.99); border: none; color: white; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; font-size: 18px; }
     .control-btn:hover:not(:disabled) { background: rgba(255, 255, 255, 0.2); transform: scale(1.1); }
     .control-btn:disabled { opacity: 0.3; cursor: not-allowed; }
     .page-counter { color: white; font-weight: 600; font-size: 14px; min-width: 80px; text-align: center; padding: 0 15px; }
@@ -65,8 +110,8 @@
         .viewer-header { padding: 60px 15px; }
         .viewer-header { margin: 0px 0px -53px; }
         .viewer-title { font-size: 16px; }
-        .viewer-content { padding: 10px; flex-direction: column; }
-        .flipbook-container { max-width: 100%; max-height: 75vh; padding: 0 10px; overflow: visible; }
+        .viewer-content { padding: 10px; flex-direction: column; overflow-x: auto; overflow-y: auto; }
+        .flipbook-container { max-width: none; max-height: none; padding: 0 10px; overflow: visible; }
         #prev-side-btn { display: flex !important; width: 40px; height: 40px; font-size: 16px; left: 10px; z-index: 1000; }
         #next-side-btn { display: flex !important; width: 40px; height: 40px; font-size: 16px; right: 10px; z-index: 1000; }
         .controls {
@@ -130,44 +175,6 @@
     }
 
     /* ===== SECURITY PROTECTIONS ===== */
-    /* 1) TAB FOCUS BLUR PROTECTION */
-    .security-overlay { 
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-        background: rgba(0, 0, 0, 0.8); display: none; z-index: 99999; 
-        align-items: center; justify-content: center; 
-        backdrop-filter: blur(8px); animation: fadeIn 0.3s ease;
-    }
-    .security-overlay.active { display: flex; }
-    .security-overlay-content { 
-        background: white; padding: 40px; border-radius: 12px; 
-        text-align: center; max-width: 450px; 
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    }
-    .security-overlay-icon { font-size: 48px; margin-bottom: 15px; color: #ef4444; }
-    .security-overlay-title { font-size: 22px; font-weight: 700; color: #1f2937; margin-bottom: 10px; }
-    .security-overlay-message { font-size: 14px; color: #6b7280; line-height: 1.5; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-    /* Tab blur filter on content */
-    .flipbook-viewer.is-blurred { filter: blur(12px); pointer-events: none; }
-
-    /* 2) ZOOM HARDENING WARNING */
-    .zoom-warning { 
-        position: fixed; top: 100px; left: 50%; transform: translateX(-50%); 
-        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); 
-        color: #78350f; padding: 12px 20px; border-radius: 8px; 
-        box-shadow: 0 8px 20px rgba(251, 191, 36, 0.4); 
-        z-index: 9999; display: none; font-weight: 600; font-size: 14px;
-        animation: slideDown 0.4s ease;
-    }
-    .zoom-warning.show { display: flex; gap: 10px; align-items: center; }
-    @keyframes slideDown { from { transform: translateX(-50%) translateY(-30px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
-
-    /* Subtle blur when high zoom detected */
-    .flipbook-viewer.zoom-blurred #flipbook .page img { 
-        filter: blur(1.2px); 
-        opacity: 0.98;
-    }
 
     /* 3) ANTI-OCR NOISE OVERLAY - invisible to human eye */
     #flipbook .page { position: relative; }
@@ -185,36 +192,32 @@
     #flipbook .page:nth-child(odd)::after { background-position: 0 0; }
     #flipbook .page:nth-child(4n)::after { background-position: 12px 8px; }
     #flipbook .page:nth-child(3n)::after { background-position: 8px 12px; }
+
+    /* SCREENSHOT PREVENTION - Print media blocking */
+    @media print {
+        .flipbook-viewer { display: none !important; }
+        body { display: none !important; }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 
-<!-- SECURITY: Overlay shown when tab loses focus -->
-<div class="security-overlay" id="securityOverlay">
-    <div class="security-overlay-content">
-        <div class="security-overlay-icon"><i class="fas fa-lock"></i></div>
-        <div class="security-overlay-title">Content Protected</div>
-        <div class="security-overlay-message">
-            This document is hidden when you switch tabs to prevent unauthorized viewing.
-        </div>
-    </div>
-</div>
-
-<!-- SECURITY: Warning banner for high zoom -->
-<div class="zoom-warning" id="zoomWarning">
-    <i class="fas fa-exclamation-triangle"></i>
-    <span>High zoom detected - content protection activated</span>
-</div>
-
 <div class="flipbook-viewer" id="flipbookViewer">
     <div class="viewer-header">
         <a href="{% url 'home' %}" class="viewer-back"><i class="fas fa-arrow-left"></i> Back to Library</a>
         <div class="viewer-title">{{ book.title }}</div>
-        <div class="bookmark-section" style="margin-left:auto; display:flex; gap:10px; align-items:center;">
-            <button class="control-btn bookmark-btn" id="bookmark-btn" title="Add Bookmark"><i class="fas fa-bookmark"></i></button>
-            <button class="control-btn" id="show-bookmarks" title="Show Bookmarks"><i class="fas fa-bars"></i></button>
-        </div>
+            <div style="margin-left:auto; display:flex; gap:10px; align-items:center;">
+                <div class="bookmark-section" style="display:flex; gap:10px; align-items:center;">
+                    <button class="control-btn bookmark-btn" id="bookmark-btn" title="Add Bookmark"><i class="fas fa-bookmark"></i></button>
+                    <button class="control-btn" id="show-bookmarks" title="Show Bookmarks"><i class="fas fa-bars"></i></button>
+                </div>
+                <div class="page-counter" style="margin-right:0;"> <span id="current-page">1</span> / <span id="total-pages">{{ total_pages }}</span> </div>
+                <div class="jump-to-page" style="margin-right:0;">
+                    <input type="number" id="jump-page-input" placeholder="Go to page" title="Jump to Page" min="1" max="{{ total_pages }}">
+                    <button class="control-btn" id="jump-page-btn" title="Jump to Page"><i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
     </div>
     <div class="viewer-content" id="viewer-content">
         <div class="loading-spinner"><i class="fas fa-spinner"></i></div>
@@ -227,69 +230,18 @@
             </div>
             <button class="side-nav-btn" id="next-side-btn" title="Next Page"><i class="fas fa-chevron-right"></i></button>
         </div>
-        <div class="controls">
+        {% comment %} <div class="controls">
             <button class="control-btn" id="prev-btn" title="Previous Page"><i class="fas fa-chevron-left"></i></button>
-            {% comment %} <button class="control-btn" id="first-btn" title="First Page"><i class="fas fa-step-backward"></i></button> {% endcomment %}
-            <div class="page-counter"><span id="current-page">1</span> / <span id="total-pages">{{ total_pages }}</span></div>
-            {% comment %} <button class="control-btn" id="last-btn" title="Last Page"><i class="fas fa-step-forward"></i></button> {% endcomment %}
+            <button class="control-btn" id="first-btn" title="First Page"><i class="fas fa-step-backward"></i></button>
+            <button class="control-btn" id="last-btn" title="Last Page"><i class="fas fa-step-forward"></i></button>
             <button class="control-btn" id="next-btn" title="Next Page"><i class="fas fa-chevron-right"></i></button>
             <div class="jump-to-page">
                 <input type="number" id="jump-page-input" placeholder="Go to page" title="Jump to Page" min="1" max="{{ total_pages }}">
                 <button class="control-btn" id="jump-page-btn" title="Jump to Page"><i class="fas fa-arrow-right"></i></button>
             </div>
-            <div class="zoom-controls">
-                <button class="control-btn" id="zoom-out" title="Zoom Out"><i class="fas fa-search-minus"></i></button>
-                <button class="control-btn" id="zoom-in" title="Zoom In"><i class="fas fa-search-plus"></i></button>
-            </div>
-            {% comment %} <div class="fullscreen-btn">
-                <button class="control-btn" id="fullscreen" title="Fullscreen"><i class="fas fa-expand"></i></button>
-            </div> {% endcomment %}
-        </div>
+           
+        </div> {% endcomment %}
         
-        <!-- Terms and Conditions Section -->
-        <div style="
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 12px;
-            padding: 24px;
-            margin-top: 30px;
-            max-width: 800px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        ">
-            <h3 style="
-                color: #2d3748;
-                font-size: 18px;
-                font-weight: 600;
-                margin-bottom: 16px;
-                text-align: center;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 10px;
-            ">
-                <i class="fas fa-file-contract" style="color: #4083ff;"></i>
-                Terms & Conditions
-            </h3>
-            <p style="
-                color: #4a5568;
-                line-height: 1.6;
-                margin: 0;
-                font-size: 14px;
-                text-align: justify;
-            ">
-               Legal Caution  : 
-
-            Pls dont forward this Pdf to anywhere to any Individual, group or any Organization. Do not resale or distribute this  Pdf commercially or in kind to any person, group or organization. Do not use this  Pdf in non-social way or for any non-social purpose or reason. This act is illegal and is punishable under Digital Assets Privacy Law & Cyber Crime Laws of India. 
-
-            આ બાયોડેટા બુકલેટ  ફિઝિકલ કે ડિજિટલ (પીડીએફ  કે અન્ય ) કોપી બનાવીને વેચાણ કે અન્ય રીતે વિતરણ કરવું તે ગેર કાનૂની છે . જો કોઈ વ્યક્તિ કે સંસ્થા આવું કરશે તો તે વ્યક્તિ કે સંસ્થા વિરુદ્ધ સખત કાનૂની પગલાં લેવામાં આવશે. કાનૂની જોગવાઈ પ્રમાણે આ કૃત્ય સખત સજાને પાત્ર છે, આ બાયોડેટા પીડીએફ  અને તેના ડેટાનો માત્ર સામાજિક કાર્ય માટે ઉપયોગ કરવો, કોઈપણ વ્યક્તિ કે સંસ્થાએ આ બુકલેટનો કોમર્શીયલ ઉપયોગ કરવો નહિ અન્યથા તે વ્યક્તિ કે સંસ્થા વિરુદ્ધ કાનૂની પગલાં લેવામાં આવશે. 
-
-            ભૂદેવ નેટવર્ક - Legal Team 
-            અમદાવાદ, વડોદરા
-
-            From Bhudev Network
-            </p>
-        </div>
     </div>
 </div>
 
@@ -305,10 +257,16 @@
             <i class="fas fa-bookmark"></i>
             <p>No bookmarks yet</p>
             <small>Click the bookmark icon to save pages</small>
-        </div>
-    </div>
-</div>
-
+                    <div style="margin-left:auto; display:flex; gap:18px; align-items:center;">
+                        <div class="page-counter" style="margin-right:0;"> <span id="current-page">1</span> / <span id="total-pages">{{ total_pages }}</span> </div>
+                        <div class="jump-to-page" style="margin-right:0;">
+                            <input type="number" id="jump-page-input" placeholder="Go to page" title="Jump to Page" min="1" max="{{ total_pages }}">
+                            <button class="control-btn" id="jump-page-btn" title="Jump to Page"><i class="fas fa-arrow-right"></i></button>
+                        </div>
+                        <div class="bookmark-section" style="display:flex; gap:10px; align-items:center;">
+                            <button class="control-btn bookmark-btn" id="bookmark-btn" title="Add Bookmark"><i class="fas fa-bookmark"></i></button>
+                            <button class="control-btn" id="show-bookmarks" title="Show Bookmarks"><i class="fas fa-bars"></i></button>
+                        </div>
 {% endblock %}
 
 {% block extra_js %}
@@ -325,14 +283,13 @@ $(document).ready(function() {
         pages = [];
     }
     const loadedPages = new Set();
-    
     // ===== SECURITY PROTECTIONS MODULE =====
     // Comprehensive content protection system for secure PDF viewing
     
     const SecurityManager = {
         config: {
-            tabFocusProtection: true,      // Blur when tab loses focus
-            zoomHardeningEnabled: true,    // Protect against zoom screenshots
+            tabFocusProtection: false,     // Blur when tab loses focus
+            zoomHardeningEnabled: false,   // Protect against zoom screenshots
             zoomThreshold: 1.25,           // Trigger blur at 125% zoom (1.25 DPR)
             antiOCREnabled: true,          // Noise overlay (CSS-based)
             enableConsoleLogging: true,    // Log security events
@@ -371,10 +328,8 @@ $(document).ready(function() {
 
         activateBlur(event) {
             const viewer = $('#flipbookViewer');
-            const overlay = $('#securityOverlay');
             
             viewer.addClass('is-blurred');
-            overlay.addClass('active');
             
             if (this.config.enableConsoleLogging) {
                 console.warn('🔐 SECURITY:', event);
@@ -383,10 +338,8 @@ $(document).ready(function() {
 
         deactivateBlur(event) {
             const viewer = $('#flipbookViewer');
-            const overlay = $('#securityOverlay');
             
             viewer.removeClass('is-blurred');
-            overlay.removeClass('active');
             
             if (this.config.enableConsoleLogging) {
                 console.log('✓', event);
@@ -506,6 +459,23 @@ $(document).ready(function() {
         return false;
     });
 
+    // Block PrintScreen key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'PrintScreen') {
+            e.preventDefault();
+            console.warn('📸 SECURITY: PrintScreen blocked');
+            // Clear clipboard to prevent paste
+            navigator.clipboard.writeText('');
+            return false;
+        }
+        // Also block Ctrl+P (Print)
+        if (e.ctrlKey && e.key === 'p') {
+            e.preventDefault();
+            console.warn('�️ SECURITY: Print blocked');
+            return false;
+        }
+    });
+
     // Disable text selection on flipbook
     $('#flipbook').css({
         'user-select': 'none',
@@ -551,8 +521,8 @@ $(document).ready(function() {
     
     function initFlipbook() {
         const isMobile = window.innerWidth <= 768;
-        const flipbookWidth = isMobile ? window.innerWidth * 0.9 : 900;
-        const flipbookHeight = isMobile ? window.innerHeight * 0.65 : 1000;
+        const flipbookWidth = isMobile ? window.innerWidth * 1.4 : 1200;
+        const flipbookHeight = isMobile ? window.innerHeight * 0.85 : 1100;
         
         // Initialize turn.js first
         $("#flipbook").turn({
@@ -628,8 +598,8 @@ $(document).ready(function() {
     
     function applyZoom() {
         const isMobile = window.innerWidth <= 768;
-        const newWidth = (isMobile ? window.innerWidth * 0.9 : baseWidth) * currentZoom;
-        const newHeight = (isMobile ? window.innerHeight * 0.65 : baseHeight) * currentZoom;
+        const newWidth = (isMobile ? window.innerWidth * 1.4 : baseWidth) * currentZoom;
+        const newHeight = (isMobile ? window.innerHeight * 0.85 : baseHeight) * currentZoom;
         
         // Dynamically resize the flipbook using turn.js
         try {
@@ -640,18 +610,10 @@ $(document).ready(function() {
         
         // Adjust overflow based on zoom level
         const viewerContent = $('#viewer-content');
-        if (currentZoom === 1) {
-            viewerContent.css({
-                'overflow-y': 'auto',
-                'overflow-x': 'hidden'
-            });
-            $('#flipbook-wrapper').css('transform', 'none');
-        } else {
-            viewerContent.css({
-                'overflow-y': 'auto',
-                'overflow-x': 'auto'
-            });
-        }
+        viewerContent.css({
+            'overflow-y': 'auto',
+            'overflow-x': 'auto'
+        });
     }
     $('#fullscreen').click(function() {
         const element = document.getElementById('viewer-content');
@@ -670,8 +632,8 @@ $(document).ready(function() {
         const isMobile = window.innerWidth <= 768;
         try {
             $("#flipbook").turn("size", 
-                isMobile ? window.innerWidth * 0.9 : 900,
-                isMobile ? window.innerHeight * 0.65 : 1000
+                isMobile ? window.innerWidth * 1.4 : 900,
+                isMobile ? window.innerHeight * 0.85 : 1000
             );
         } catch(e) {
             console.log("Resize handling:", e);

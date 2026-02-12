@@ -5,18 +5,15 @@ from django.utils.html import format_html
 
 @admin.register(UnlockRequest)
 class UnlockRequestAdmin(admin.ModelAdmin):
-    list_display = ('flipbook', 'candidate_full_name', 'date_of_birth', 'parents_mobile_number', 'marital_status', 'payment_screenshot_thumbnail', 'status', 'submitted_at', 'user')
+    list_display = ('flipbook', 'candidate_full_name', 'date_of_birth', 'parents_mobile_number', 'marital_status', 'status', 'submitted_at', 'user')
     list_filter = ('status', 'flipbook', 'marital_status', 'user')
     search_fields = ('candidate_full_name', 'parents_mobile_number')
-    readonly_fields = ('submitted_at', 'payment_screenshot_preview')
+    readonly_fields = ('submitted_at',)
     actions = ['mark_as_pending', 'mark_as_approved', 'mark_as_rejected']
     
     fieldsets = (
         ('Candidate Information', {
             'fields': ('flipbook', 'candidate_full_name', 'date_of_birth', 'parents_mobile_number', 'marital_status')
-        }),
-        ('Payment Details', {
-            'fields': ('payment_screenshot', 'payment_screenshot_preview')
         }),
         ('Request Status', {
             'fields': ('status', 'submitted_at', 'user')
@@ -25,26 +22,6 @@ class UnlockRequestAdmin(admin.ModelAdmin):
             'fields': ('terms_accepted',)
         }),
     )
-    
-    def payment_screenshot_thumbnail(self, obj):
-        """Display payment screenshot thumbnail in list view"""
-        if obj.payment_screenshot:
-            return format_html(
-                '<img src="{}" style="max-width: 80px; max-height: 80px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); cursor: pointer;" title="Click to view full details" />',
-                obj.payment_screenshot.url
-            )
-        return '<span style="color: #999;">—</span>'
-    payment_screenshot_thumbnail.short_description = 'Payment Screenshot'
-    
-    def payment_screenshot_preview(self, obj):
-        """Display payment screenshot preview in admin detail view"""
-        if obj.payment_screenshot:
-            return format_html(
-                '<img src="{}" style="max-width: 300px; max-height: 300px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />',
-                obj.payment_screenshot.url
-            )
-        return '<span style="color: #999;">No screenshot uploaded</span>'
-    payment_screenshot_preview.short_description = 'Payment Screenshot Preview'
     
     # Custom Actions for Status Update
     def mark_as_pending(self, request, queryset):

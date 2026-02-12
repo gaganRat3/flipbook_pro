@@ -35,14 +35,13 @@ from .models import UnlockRequest, FlipBook
 class UnlockRequestForm(forms.ModelForm):
     class Meta:
         model = UnlockRequest
-        fields = ['flipbook', 'candidate_full_name', 'date_of_birth', 'parents_mobile_number', 'marital_status', 'payment_screenshot', 'terms_accepted']
+        fields = ['flipbook', 'candidate_full_name', 'date_of_birth', 'parents_mobile_number', 'marital_status', 'terms_accepted']
         widgets = {
             'flipbook': forms.HiddenInput(),
             'candidate_full_name': forms.TextInput(attrs={'class': 'form-control'}),
             'date_of_birth': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'parents_mobile_number': forms.TextInput(attrs={'class': 'form-control', 'type': 'tel'}),
             'marital_status': forms.Select(attrs={'class': 'form-control'}),
-            'payment_screenshot': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
             'terms_accepted': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 

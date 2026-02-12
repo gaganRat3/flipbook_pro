@@ -70,7 +70,7 @@ class FlipBook(models.Model):
             pdf_document = fitz.open(pdf_path)
             if len(pdf_document) > 0:
                 page = pdf_document[0]
-                mat = fitz.Matrix(1.5, 1.5)
+                mat = fitz.Matrix(1.67, 1.67)
                 pix = page.get_pixmap(matrix=mat)
                 thumbnail_path = os.path.join(settings.MEDIA_ROOT, 'thumbnails', f'{self.id}_thumb.jpg')
                 os.makedirs(os.path.dirname(thumbnail_path), exist_ok=True)
@@ -104,15 +104,15 @@ class FlipBook(models.Model):
             for page_num in range(total_pages):
                 page = pdf_document[page_num]
                 
-                # Render page to image at 2.0x zoom (144 DPI) for sharp quality
-                mat = fitz.Matrix(2.0, 2.0)
+                # Render page to image at 1.5x zoom (108 DPI) for balanced quality
+                mat = fitz.Matrix(1.5, 1.5)
                 pix = page.get_pixmap(matrix=mat)
                 
-                # Save as JPEG with optimized quality
+                # Save as JPEG with extremely low quality (25% for maximum screenshot protection)
                 image_path = os.path.join(book_dir, f'page_{page_num + 1}.jpg')
                 
                 # Convert to PIL Image for better compression control
-                img_data = pix.tobytes("jpeg", jpg_quality=90)
+                img_data = pix.tobytes("jpeg", jpg_quality=25)
                 with open(image_path, 'wb') as f:
                     f.write(img_data)
                 
@@ -132,7 +132,7 @@ class FlipBook(models.Model):
                 
                 with Image.open(first_page_image) as img:
                     img.thumbnail((300, 400))
-                    img.save(thumbnail_path, 'JPEG', quality=90)
+                    img.save(thumbnail_path, 'JPEG', quality=25)
                 
                 self.thumbnail = f'thumbnails/{self.id}_thumb.jpg'
             
@@ -205,7 +205,6 @@ class UnlockRequest(models.Model):
     date_of_birth = models.DateField()
     parents_mobile_number = models.CharField(max_length=20)
     marital_status = models.CharField(max_length=20, choices=MARITAL_STATUS_CHOICES)
-    payment_screenshot = models.ImageField(upload_to='payment_screenshots/')
     terms_accepted = models.BooleanField(default=False)
     submitted_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, default='pending', choices=[('pending', 'Pending'), ('approved', 'Approved'), ('rejected', 'Rejected')])
