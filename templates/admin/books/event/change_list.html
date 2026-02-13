@@ -1,0 +1,43 @@
+{% extends 'admin/change_list.html' %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    .help-box {
+        background: #e7f3ff;
+        border: 1px solid #bee5eb;
+        border-radius: 6px;
+        padding: 15px;
+        margin: 15px 0;
+        position: relative;
+    }
+    .help-box h4 {
+        color: #0c5460;
+        margin: 0 0 10px 0;
+    }
+    .help-box ul {
+        margin: 0;
+        padding-left: 20px;
+    }
+    .help-box li {
+        margin-bottom: 5px;
+    }
+    .help-text {
+        color: #495057;
+    }
+</style>
+{% endblock %}
+
+{% block content_title %}
+{{ block.super }}
+<div class="help-box">
+    <h4>📋 Event Management</h4>
+    <div class="help-text">
+        <ul>
+            <li><strong>Create events:</strong> You can create multiple events with similar names if needed</li>
+            <li><strong>Organize books:</strong> Each event will show only its assigned books</li>
+            <li><strong>Separate displays:</strong> Each event appears separately in the frontend</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

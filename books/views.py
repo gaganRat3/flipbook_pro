@@ -114,8 +114,9 @@ def home_view(request):
     if selected_category:
         books = books.filter(title__icontains=selected_category)
 
-    # Sort books: accessible first, then locked
-    books = sorted(books, key=lambda b: b.id not in accessible_ids)
+    # Order books by event, then accessible status
+    # This ensures the regroup template tag works properly
+    books = books.select_related('event').order_by('event__name', 'title')
 
     # Category button lists
     girl_categories = [

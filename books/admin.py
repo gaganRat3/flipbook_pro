@@ -2,6 +2,7 @@ from django.contrib import admin
 from .models import FlipBook, BookView, Event, FlipBookAccess, UserProfile
 from .models import UnlockRequest
 from django.utils.html import format_html
+from django.contrib import messages
 
 @admin.register(UnlockRequest)
 class UnlockRequestAdmin(admin.ModelAdmin):
@@ -53,17 +54,22 @@ from django.contrib import messages
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
-    list_display = ['name', 'color_preview', 'icon', 'is_active', 'created_at']
+    list_display = ['name', 'color_preview', 'icon', 'book_count', 'is_active', 'created_at']
     list_filter = ['is_active', 'created_at']
     search_fields = ['name', 'description']
-    readonly_fields = ['created_at', 'updated_at', 'color_preview']
+    readonly_fields = ['created_at', 'updated_at', 'color_preview', 'book_count']
     
     fieldsets = (
         ('Event Information', {
-            'fields': ('name', 'description', 'icon', 'color', 'color_preview')
+            'fields': ('name', 'description', 'icon', 'color', 'color_preview'),
+            'description': 'Create events to categorize your flipbooks. Check if a similar event already exists before creating a new one.'
         }),
         ('Settings', {
             'fields': ('is_active',)
+        }),
+        ('Statistics', {
+            'fields': ('book_count',),
+            'classes': ('collapse',)
         }),
         ('Metadata', {
             'fields': ('created_at', 'updated_at'),
@@ -75,6 +81,19 @@ class EventAdmin(admin.ModelAdmin):
         return f'<div style="width: 50px; height: 50px; background-color: {obj.color}; border-radius: 8px; border: 2px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></div>'
     color_preview.short_description = 'Color Preview'
     color_preview.allow_tags = True
+
+    def book_count(self, obj):
+        count = obj.flipbooks.count()
+        return f'{count} book{"s" if count != 1 else ""}'
+    book_count.short_description = 'Books Count'
+
+    class Media:
+        js = ('admin/js/event_admin.js',)
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        if not change:  # If creating new event
+            messages.success(request, f"Event '{obj.name}' created successfully!")
 
 
 @admin.register(FlipBook)
@@ -96,6 +115,18 @@ class FlipBookAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "event":
+            # Order events by name for easier selection
+            kwargs["queryset"] = Event.objects.filter(is_active=True).order_by('name')
+        if db_field.name == "created_by":
+            kwargs["queryset"] = User.objects.filter(is_staff=True)
+            return forms.ModelChoiceField(queryset=kwargs["queryset"])
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    class Media:
+        js = ('admin/js/event_admin.js',)
 
     def thumbnail_preview(self, obj):
         if obj.thumbnail:

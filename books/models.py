@@ -8,7 +8,7 @@ from django.conf import settings
 
 class Event(models.Model):
     """Model for organizing flipbooks by events"""
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)  # Remove unique constraint
     description = models.TextField(blank=True)
     icon = models.CharField(max_length=50, default='fa-calendar', help_text="Font Awesome icon class")
     color = models.CharField(max_length=7, default='#2E86AB', help_text="Hex color code")
