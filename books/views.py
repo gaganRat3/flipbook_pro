@@ -6,7 +6,7 @@ from .forms import UsernameMobileAuthenticationForm
 from django.contrib.auth.models import User
 from django.contrib import messages
 import json
-from .models import FlipBook, BookView, Event, FlipBookAccess, UserProfile, UnlockRequest
+from .models import FlipBook, BookView, Event, FlipBookAccess, UserProfile, UnlockRequest, UserLoginSession
 
 
 def get_client_ip(request):
@@ -17,6 +17,54 @@ def get_client_ip(request):
     else:
         ip = request.META.get('REMOTE_ADDR')
     return ip
+
+
+def cleanup_expired_sessions():
+    """Remove login sessions that no longer exist in Django's session table"""
+    from django.contrib.sessions.models import Session
+    from django.utils import timezone
+    
+    # Get all active session keys in Django
+    valid_sessions = Session.objects.values_list('session_key', flat=True)
+    
+    # Delete any UserLoginSession that references an expired session
+    UserLoginSession.objects.exclude(session_key__in=valid_sessions).delete()
+
+
+@login_required
+def active_sessions_view(request):
+    """Show user their active login sessions and allow logout from other devices"""
+    user = request.user
+    sessions = UserLoginSession.objects.filter(user=user).order_by('-login_at')
+    
+    # Cleanup expired sessions
+    cleanup_expired_sessions()
+    
+    # Recount after cleanup
+    sessions = UserLoginSession.objects.filter(user=user).order_by('-login_at')
+    
+    context = {
+        'sessions': sessions,
+        'current_session_key': request.session.session_key,
+    }
+    return render(request, 'books/active_sessions.html', context)
+
+
+@login_required
+def logout_other_session(request, session_id):
+    """Allow user to logout from another session/device"""
+    if request.method == 'POST':
+        session = get_object_or_404(UserLoginSession, id=session_id, user=request.user)
+        
+        # Don't allow logout from current session
+        if session.session_key == request.session.session_key:
+            messages.error(request, "You cannot logout from your current session here. Use the logout button instead.")
+            return redirect('active_sessions')
+        
+        session.delete()
+        messages.success(request, "That session has been logged out successfully.")
+    
+    return redirect('active_sessions')
 
 
 def register_view(request):
@@ -52,7 +100,33 @@ def login_view(request):
         form = UsernameMobileAuthenticationForm(request.POST)
         if form.is_valid():
             user = form.cleaned_data['user']
+            
+            # Check concurrent login limit (max 1)
+            active_sessions = UserLoginSession.objects.filter(user=user).count()
+            
+            if active_sessions >= 1:
+                messages.error(
+                    request, 
+                    f"Cannot login! A user is already logged in to this account. "
+                    "Please logout the other session and try again."
+                )
+                return render(request, 'books/login.html', {'form': form})
+            
+            # Login the user
             login(request, user)
+            
+            # Get IP address and user agent
+            ip_address = get_client_ip(request)
+            user_agent = request.META.get('HTTP_USER_AGENT', '')
+            
+            # Create a new login session record
+            UserLoginSession.objects.create(
+                user=user,
+                session_key=request.session.session_key,
+                ip_address=ip_address,
+                user_agent=user_agent
+            )
+            
             messages.success(request, f"Welcome back, {user.username}!")
             return redirect('home')
         else:
@@ -65,6 +139,13 @@ def login_view(request):
 
 def logout_view(request):
     """User logout view"""
+    # Remove the login session record before logging out
+    if request.user.is_authenticated:
+        UserLoginSession.objects.filter(
+            user=request.user,
+            session_key=request.session.session_key
+        ).delete()
+    
     logout(request)
     messages.info(request, "You have successfully logged out.")
     return redirect('login')

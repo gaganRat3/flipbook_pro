@@ -9,4 +9,6 @@ urlpatterns = [
     path('book/<int:book_id>/', views.flipbook_view, name='flipbook'),
     path('unlock-request/', views.unlock_request_view, name='unlock_request'),
     path('debug/access/', views.debug_access_view, name='debug_access'),
+    path('active-sessions/', views.active_sessions_view, name='active_sessions'),
+    path('logout-session/<int:session_id>/', views.logout_other_session, name='logout_session'),
 ]

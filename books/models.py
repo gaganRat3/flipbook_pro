@@ -212,3 +212,20 @@ class UnlockRequest(models.Model):
 
     def __str__(self):
         return f"UnlockRequest({self.candidate_full_name}, {self.flipbook.title}, {self.status})"
+
+
+class UserLoginSession(models.Model):
+    """Track concurrent login sessions per user (max 3 allowed)"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='login_sessions')
+    session_key = models.CharField(max_length=40, unique=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(blank=True)
+    login_at = models.DateTimeField(auto_now_add=True)
+    last_activity = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'User Login Session'
+        verbose_name_plural = 'User Login Sessions'
+
+    def __str__(self):
+        return f"{self.user.username} - {self.login_at}"
