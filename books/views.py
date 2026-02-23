@@ -96,6 +96,8 @@ def login_view(request):
     if request.user.is_authenticated:
         return redirect('home')
 
+    session_limit_error = False
+    
     if request.method == 'POST':
         form = UsernameMobileAuthenticationForm(request.POST)
         if form.is_valid():
@@ -105,12 +107,11 @@ def login_view(request):
             active_sessions = UserLoginSession.objects.filter(user=user).count()
             
             if active_sessions >= 1:
-                messages.error(
-                    request, 
-                    f"Cannot login! A user is already logged in to this account. "
-                    "Please logout the other session and try again."
-                )
-                return render(request, 'books/login.html', {'form': form})
+                session_limit_error = True
+                return render(request, 'books/login.html', {
+                    'form': form,
+                    'session_limit_error': True
+                })
             
             # Login the user
             login(request, user)
@@ -134,7 +135,10 @@ def login_view(request):
     else:
         form = UsernameMobileAuthenticationForm()
 
-    return render(request, 'books/login.html', {'form': form})
+    return render(request, 'books/login.html', {
+        'form': form,
+        'session_limit_error': session_limit_error
+    })
 
 
 def logout_view(request):

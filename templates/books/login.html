@@ -37,6 +37,27 @@
     </div>
 </div>
 
+<!-- Session Limit Modal Popup -->
+{% if session_limit_error %}
+<div class="modal-overlay" id="sessionModal">
+    <div class="modal-popup">
+        <div class="modal-header">
+            <i class="fas fa-lock"></i>
+            <h2>Cannot Login</h2>
+        </div>
+        <div class="modal-body">
+            <p>A user is already logged in to this account.</p>
+            <p style="font-weight: 600; color: #dc2626; margin-top: 15px;">
+                Please logout from the other session and try again.
+            </p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="modal-btn" onclick="closeSessionModal()">Understood</button>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <!-- Loading Overlay -->
 <div class="loading-overlay" id="loadingOverlay">
     <div class="loading-content">
@@ -69,6 +90,79 @@
     .login-footer p { color: #666; font-size: 14px; }
     .login-footer a { color: #FA8112; text-decoration: none; font-weight: 600; transition: color 0.3s; }
     .login-footer a:hover { color: #FF9140; }
+    
+    /* Modal Popup Styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        animation: fadeIn 0.3s ease;
+    }
+    .modal-popup {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        max-width: 450px;
+        width: 90%;
+        overflow: hidden;
+        animation: slideUp 0.4s ease;
+    }
+    .modal-header {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        color: white;
+        padding: 30px 20px;
+        text-align: center;
+    }
+    .modal-header i {
+        font-size: 48px;
+        margin-bottom: 15px;
+        display: block;
+    }
+    .modal-header h2 {
+        font-size: 26px;
+        font-weight: 700;
+        margin: 0;
+    }
+    .modal-body {
+        padding: 30px 20px;
+        text-align: center;
+    }
+    .modal-body p {
+        font-size: 16px;
+        color: #4b5563;
+        line-height: 1.6;
+        margin: 0;
+    }
+    .modal-footer {
+        padding: 20px;
+        background: #f9fafb;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+    .modal-btn {
+        padding: 12px 40px;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #FA8112 0%, #FF9140 100%);
+        color: white;
+    }
+    .modal-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(250, 129, 18, 0.4);
+    }
     
     /* Loading Overlay Styles */
     .loading-overlay {
@@ -145,6 +239,24 @@
             transform: translateY(0);
         }
     }
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    @keyframes fadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
 </style>
 
 <!-- Terms and Conditions Section -->
@@ -193,9 +305,22 @@
 </div>
 
 <script>
+    function closeSessionModal() {
+        const modal = document.getElementById('sessionModal');
+        if (modal) {
+            modal.style.animation = 'fadeOut 0.3s ease';
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+    }
+
     document.getElementById('loginForm').addEventListener('submit', function(e) {
-        // Show loading overlay
-        document.getElementById('loadingOverlay').classList.add('active');
+        // Show loading overlay only if no session limit error
+        const sessionErrorModal = document.getElementById('sessionModal');
+        if (!sessionErrorModal) {
+            document.getElementById('loadingOverlay').classList.add('active');
+        }
     });
 </script>
 {% endblock %}
