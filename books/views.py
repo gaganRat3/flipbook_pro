@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
-from .forms import UsernameMobileAuthenticationForm
+from .forms import UsernameEmailAuthenticationForm, RegistrationForm
 from django.contrib.auth.models import User
 from django.contrib import messages
 import json
@@ -73,11 +73,12 @@ def register_view(request):
         return redirect('home')
     
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = RegistrationForm(request.POST)
         mobile_number = request.POST.get('mobile_number')
         if form.is_valid():
             user = form.save()
-            # Save mobile number
+            user.email = form.cleaned_data.get('email')
+            user.save()
             UserProfile.objects.create(user=user, mobile_number=mobile_number)
             messages.success(request, "Account created successfully! Please log in.")
             return redirect('login')
@@ -86,54 +87,86 @@ def register_view(request):
                 for error in errors:
                     messages.error(request, f"{field}: {error}")
     else:
-        form = UserCreationForm()
+        form = RegistrationForm()
     
     return render(request, 'books/register.html', {'form': form})
 
 
 def login_view(request):
-    """User login view (username, mobile, and password required)"""
+    """User login view (username, email, and password required, with OTP verification)"""
     if request.user.is_authenticated:
         return redirect('home')
 
     session_limit_error = False
     
     if request.method == 'POST':
-        form = UsernameMobileAuthenticationForm(request.POST)
-        if form.is_valid():
-            user = form.cleaned_data['user']
-            
-            # Check concurrent login limit (max 1)
-            active_sessions = UserLoginSession.objects.filter(user=user).count()
-            
-            if active_sessions >= 1:
-                session_limit_error = True
-                return render(request, 'books/login.html', {
-                    'form': form,
-                    'session_limit_error': True
-                })
-            
-            # Login the user
-            login(request, user)
-            
-            # Get IP address and user agent
-            ip_address = get_client_ip(request)
-            user_agent = request.META.get('HTTP_USER_AGENT', '')
-            
-            # Create a new login session record
-            UserLoginSession.objects.create(
-                user=user,
-                session_key=request.session.session_key,
-                ip_address=ip_address,
-                user_agent=user_agent
+        form = UsernameEmailAuthenticationForm(request.POST)
+        otp = request.POST.get('otp')
+        email = request.POST.get('email')
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        # Step 1: If OTP not provided, or resend requested, send OTP and prompt for OTP
+        resend_otp = request.POST.get('resend_otp')
+        if not otp or resend_otp:
+            import random
+            from django.core.mail import send_mail
+            generated_otp = str(random.randint(100000, 999999))
+            request.session['login_otp'] = generated_otp
+            request.session['otp_email'] = email
+            send_mail(
+                'Your FlipBook Login OTP',
+                f'Your OTP for login is: {generated_otp}',
+                'noreply@flipbook.com',
+                [email],
+                fail_silently=False,
             )
-            
-            messages.success(request, f"Welcome back, {user.username}!")
-            return redirect('home')
-        else:
-            messages.error(request, "Invalid login details.")
+            if resend_otp:
+                messages.info(request, f"OTP resent to {email}. Please enter the OTP to continue.")
+            else:
+                messages.info(request, f"OTP sent to {email}. Please enter the OTP to continue.")
+            return render(request, 'books/login.html', {'form': form, 'otp_sent': True, 'email': email, 'username': username})
+
+        # Step 2: If OTP provided, verify OTP
+        if otp:
+            session_otp = request.session.get('login_otp')
+            session_email = request.session.get('otp_email')
+            if otp != session_otp or email != session_email:
+                messages.error(request, "Invalid OTP or email. Please try again.")
+                return render(request, 'books/login.html', {'form': form, 'otp_sent': True, 'email': email, 'username': username})
+
+            # OTP is valid, now check credentials
+            if form.is_valid():
+                user = form.cleaned_data['user']
+                # Check concurrent login limit (max 1)
+                active_sessions = UserLoginSession.objects.filter(user=user).count()
+                if active_sessions >= 1:
+                    session_limit_error = True
+                    return render(request, 'books/login.html', {
+                        'form': form,
+                        'session_limit_error': True
+                    })
+                # Login the user
+                login(request, user)
+                # Get IP address and user agent
+                ip_address = get_client_ip(request)
+                user_agent = request.META.get('HTTP_USER_AGENT', '')
+                # Create a new login session record
+                UserLoginSession.objects.create(
+                    user=user,
+                    session_key=request.session.session_key,
+                    ip_address=ip_address,
+                    user_agent=user_agent
+                )
+                messages.success(request, f"Welcome back, {user.username}!")
+                # Clean up OTP from session
+                request.session.pop('login_otp', None)
+                request.session.pop('otp_email', None)
+                return redirect('home')
+            else:
+                messages.error(request, "Invalid login details.")
     else:
-        form = UsernameMobileAuthenticationForm()
+        form = UsernameEmailAuthenticationForm()
 
     return render(request, 'books/login.html', {
         'form': form,

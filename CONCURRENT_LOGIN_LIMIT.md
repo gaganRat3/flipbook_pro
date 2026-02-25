@@ -7,6 +7,8 @@ Your FlipBook project now has a limit of **3 concurrent users per account**. Thi
 
 ### 1. **Login Restriction**
 When a user tries to login:
+
+
 - The system checks how many active sessions (devices logged in) are currently associated with their account
 - If **3 sessions already exist**, the login is prevented
 - The user sees an error message: *"3 users already have logged in to this account. Please logout one of them and try again."*

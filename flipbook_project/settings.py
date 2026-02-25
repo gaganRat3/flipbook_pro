@@ -11,10 +11,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Security
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-this-in-production')
 DEBUG = config('DEBUG', default=True, cast=bool)
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '58039ee8d1df.ngrok-free.app', 'keyla-mirier-pebbly.ngrok-free.dev']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '58039ee8d1df.ngrok-free.app', '4482-103-241-224-69.ngrok-free.app']
 
 # CSRF trusted origins for ngrok
-CSRF_TRUSTED_ORIGINS = ['https://58039ee8d1df.ngrok-free.app', 'https://keyla-mirier-pebbly.ngrok-free.dev']
+CSRF_TRUSTED_ORIGINS = ['https://58039ee8d1df.ngrok-free.app', 'https://4482-103-241-224-69.ngrok-free.app']
 
 # CSRF cookie settings for production
 CSRF_COOKIE_SECURE = False  # Set to True if using HTTPS in production
@@ -101,3 +101,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'register'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'register'
+
+# Email configuration (production: Gmail SMTP)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'bhudevnetwork@gmail.com'
+EMAIL_HOST_PASSWORD = 'pghm dppj ktrz bnge'
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = 'bhudevnetwork@gmail.com'
