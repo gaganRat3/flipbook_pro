@@ -1,4 +1,17 @@
 from django.contrib import admin
+from .models import UserLoginSession
+
+@admin.register(UserLoginSession)
+class UserLoginSessionAdmin(admin.ModelAdmin):
+    list_display = ('user', 'session_key', 'ip_address', 'user_agent', 'login_at', 'last_activity')
+    actions = ['force_logout']
+
+    def force_logout(self, request, queryset):
+        # Delete selected sessions to forcibly log out users
+        count = queryset.delete()[0]
+        self.message_user(request, f"{count} user session(s) forcibly logged out.")
+    force_logout.short_description = "Force logout selected user sessions"
+from django.contrib import admin
 from .models import FlipBook, BookView, Event, FlipBookAccess, UserProfile
 from .models import UnlockRequest
 from django.utils.html import format_html

@@ -94,6 +94,10 @@ def register_view(request):
 
 def login_view(request):
     """User login view (username, email, and password required, with OTP verification)"""
+    # Ensure session key exists before checking for existing sessions
+    if not request.session.session_key:
+        request.session.create()
+    
     if request.user.is_authenticated:
         return redirect('home')
 
@@ -139,6 +143,15 @@ def login_view(request):
             if form.is_valid():
                 user = form.cleaned_data['user']
                 # Check concurrent login limit (max 1)
+                from django.contrib.sessions.models import Session
+                user_sessions = UserLoginSession.objects.filter(user=user)
+                stale_sessions = []
+                for s in user_sessions:
+                    if not Session.objects.filter(session_key=s.session_key).exists():
+                        stale_sessions.append(s.id)
+                if stale_sessions:
+                    UserLoginSession.objects.filter(id__in=stale_sessions).delete()
+                # Recount after cleanup
                 active_sessions = UserLoginSession.objects.filter(user=user).count()
                 if active_sessions >= 1:
                     session_limit_error = True
