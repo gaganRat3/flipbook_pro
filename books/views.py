@@ -110,14 +110,17 @@ def login_view(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        # Step 1: If OTP not provided, or resend requested, send OTP and prompt for OTP
         resend_otp = request.POST.get('resend_otp')
+        # Step 1: If OTP not provided, or resend requested, send OTP and prompt for OTP
         if not otp or resend_otp:
             import random
             from django.core.mail import send_mail
             generated_otp = str(random.randint(100000, 999999))
             request.session['login_otp'] = generated_otp
             request.session['otp_email'] = email
+            # Save password in session for OTP step
+            if password:
+                request.session['otp_password'] = password
             send_mail(
                 'Your FlipBook Login OTP',
                 f'Your OTP for login is: {generated_otp}',
@@ -135,11 +138,16 @@ def login_view(request):
         if otp:
             session_otp = request.session.get('login_otp')
             session_email = request.session.get('otp_email')
-            if otp != session_otp or email != session_email:
+            # Use password from session if not present in POST
+            if not password:
+                password = request.session.get('otp_password')
+            if otp != session_otp or email != session_email or not password:
                 messages.error(request, "Invalid OTP or email. Please try again.")
                 return render(request, 'books/login.html', {'form': form, 'otp_sent': True, 'email': email, 'username': username})
 
-            # OTP is valid, now check credentials
+            # Build a new form with the password from session
+            form_data = {'username': username, 'email': email, 'password': password}
+            form = UsernameEmailAuthenticationForm(form_data)
             if form.is_valid():
                 user = form.cleaned_data['user']
                 # Check concurrent login limit (max 1)
@@ -172,12 +180,13 @@ def login_view(request):
                     user_agent=user_agent
                 )
                 messages.success(request, f"Welcome back, {user.username}!")
-                # Clean up OTP from session
+                # Clean up OTP and password from session
                 request.session.pop('login_otp', None)
                 request.session.pop('otp_email', None)
+                request.session.pop('otp_password', None)
                 return redirect('home')
             else:
-                messages.error(request, "Invalid login details.")
+                messages.error(request, "Invalid credentials. Please try again.")
     else:
         form = UsernameEmailAuthenticationForm()
 
