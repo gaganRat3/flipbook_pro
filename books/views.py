@@ -93,7 +93,7 @@ def register_view(request):
 
 
 def login_view(request):
-    """User login view (username, email, and password required, with OTP verification)"""
+    """User login view (username, email, and password required)"""
     # Ensure session key exists before checking for existing sessions
     if not request.session.session_key:
         request.session.create()
@@ -105,88 +105,41 @@ def login_view(request):
     
     if request.method == 'POST':
         form = UsernameEmailAuthenticationForm(request.POST)
-        otp = request.POST.get('otp')
-        email = request.POST.get('email')
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-
-        resend_otp = request.POST.get('resend_otp')
-        # Step 1: If OTP not provided, or resend requested, send OTP and prompt for OTP
-        if not otp or resend_otp:
-            import random
-            from django.core.mail import send_mail
-            generated_otp = str(random.randint(100000, 999999))
-            request.session['login_otp'] = generated_otp
-            request.session['otp_email'] = email
-            # Save password in session for OTP step
-            if password:
-                request.session['otp_password'] = password
-            send_mail(
-                'Your FlipBook Login OTP',
-                f'Your OTP for login is: {generated_otp}',
-                'noreply@flipbook.com',
-                [email],
-                fail_silently=False,
+        if form.is_valid():
+            user = form.cleaned_data['user']
+            # Check concurrent login limit (max 1)
+            from django.contrib.sessions.models import Session
+            user_sessions = UserLoginSession.objects.filter(user=user)
+            stale_sessions = []
+            for s in user_sessions:
+                if not Session.objects.filter(session_key=s.session_key).exists():
+                    stale_sessions.append(s.id)
+            if stale_sessions:
+                UserLoginSession.objects.filter(id__in=stale_sessions).delete()
+            # Recount after cleanup
+            active_sessions = UserLoginSession.objects.filter(user=user).count()
+            if active_sessions >= 1:
+                session_limit_error = True
+                return render(request, 'books/login.html', {
+                    'form': form,
+                    'session_limit_error': True
+                })
+            # Login the user
+            login(request, user)
+            # Get IP address and user agent
+            ip_address = get_client_ip(request)
+            user_agent = request.META.get('HTTP_USER_AGENT', '')
+            # Create a new login session record
+            UserLoginSession.objects.create(
+                user=user,
+                session_key=request.session.session_key,
+                ip_address=ip_address,
+                user_agent=user_agent
             )
-            if resend_otp:
-                messages.info(request, f"OTP resent to {email}. Please enter the OTP to continue.")
-            else:
-                messages.info(request, f"OTP sent to {email}. Please enter the OTP to continue.")
-            return render(request, 'books/login.html', {'form': form, 'otp_sent': True, 'email': email, 'username': username})
-
-        # Step 2: If OTP provided, verify OTP
-        if otp:
-            session_otp = request.session.get('login_otp')
-            session_email = request.session.get('otp_email')
-            # Use password from session if not present in POST
-            if not password:
-                password = request.session.get('otp_password')
-            if otp != session_otp or email != session_email or not password:
-                messages.error(request, "Invalid OTP or email. Please try again.")
-                return render(request, 'books/login.html', {'form': form, 'otp_sent': True, 'email': email, 'username': username})
-
-            # Build a new form with the password from session
-            form_data = {'username': username, 'email': email, 'password': password}
-            form = UsernameEmailAuthenticationForm(form_data)
-            if form.is_valid():
-                user = form.cleaned_data['user']
-                # Check concurrent login limit (max 1)
-                from django.contrib.sessions.models import Session
-                user_sessions = UserLoginSession.objects.filter(user=user)
-                stale_sessions = []
-                for s in user_sessions:
-                    if not Session.objects.filter(session_key=s.session_key).exists():
-                        stale_sessions.append(s.id)
-                if stale_sessions:
-                    UserLoginSession.objects.filter(id__in=stale_sessions).delete()
-                # Recount after cleanup
-                active_sessions = UserLoginSession.objects.filter(user=user).count()
-                if active_sessions >= 1:
-                    session_limit_error = True
-                    return render(request, 'books/login.html', {
-                        'form': form,
-                        'session_limit_error': True
-                    })
-                # Login the user
-                login(request, user)
-                # Get IP address and user agent
-                ip_address = get_client_ip(request)
-                user_agent = request.META.get('HTTP_USER_AGENT', '')
-                # Create a new login session record
-                UserLoginSession.objects.create(
-                    user=user,
-                    session_key=request.session.session_key,
-                    ip_address=ip_address,
-                    user_agent=user_agent
-                )
-                messages.success(request, f"Welcome back, {user.username}!")
-                # Clean up OTP and password from session
-                request.session.pop('login_otp', None)
-                request.session.pop('otp_email', None)
-                request.session.pop('otp_password', None)
-                return redirect('home')
-            else:
-                messages.error(request, "Invalid credentials. Please try again.")
+            messages.success(request, f"Welcome back, {user.username}!")
+            return redirect('home')
+        else:
+            messages.error(request, "Invalid credentials. Please try again.")
     else:
         form = UsernameEmailAuthenticationForm()
 
