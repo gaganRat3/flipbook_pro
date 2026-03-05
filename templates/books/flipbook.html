@@ -5,83 +5,48 @@
 {% block extra_css %}
 <style>
     /* Remove overflow hidden to allow scrolling */
-    body { overflow: auto; }
+    body { overflow: hidden; }
     .flipbook-viewer { position: fixed; top: 80px; left: 0; right: 0; bottom: 0; background: #2d3748; display: flex; flex-direction: column; }
-    .viewer-header { background: rgba(153, 152, 152, 0.95); padding: 35px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; flex-shrink: 0; flex-wrap: wrap; }
+    .viewer-header { background: rgba(153, 152, 152, 0.95); padding: 25px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; flex-shrink: 0; flex-wrap: wrap; }
     .bookmark-section { margin-left: 15px; padding-left: 15px; border-left: 1px solid rgba(255, 255, 255, 0.2); display: flex; gap: 10px; align-items: center; }
     @media (max-width: 768px) {
-        .viewer-header { flex-direction: column; align-items: stretch; gap: 10px; padding: 10px 8px; }
+        .viewer-header { flex-direction: column; align-items: stretch; gap: 16px; padding: 10px 8px; }
         .bookmark-section { margin-left: 0; padding-left: 0; border-left: none; justify-content: flex-end; }
     }
     .viewer-title { font-size: 18px; font-weight: 600; color: #333; }
     .viewer-back { text-decoration: none; color: #2c53fd; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: color 0.3s; }
     .viewer-back:hover { color: #0cb3e6; }
-    .viewer-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 20px; overflow-y: auto; overflow-x: auto; position: relative; width: 100%; background: #FAF3E1; }
+    .viewer-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; overflow: hidden; position: relative; width: 100%; background: #FAF3E1; }
         .flipbook-container {
-            width: 800px;
-            height: 600px;
-            overflow: auto;
+            overflow: hidden;
             position: relative;
-            display: block;
-            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             flex-shrink: 0;
-            max-width: none;
-            max-height: none;
-            /* Always show scrollbars for desktop */
-            scrollbar-width: auto;
         }
-
-        @media (max-width: 900px) {
-            .flipbook-container {
-                width: 98vw;
-                height: 60vw;
-                min-height: 300px;
-                max-height: 70vh;
-            }
-        }
-        @media (max-width: 600px) {
-            .flipbook-container {
-                width: 99vw;
-                height: 60vw;
-                min-height: 200px;
-                max-height: 60vh;
-            }
-        }
-
-        /* Show scrollbars for desktop */
-        .flipbook-container::-webkit-scrollbar {
-            width: 12px;
-            height: 12px;
-            background: #eee;
-        }
-        .flipbook-container::-webkit-scrollbar-thumb {
-            background: #ccc;
-            border-radius: 6px;
-        }
-        .flipbook-container { -ms-overflow-style: auto; scrollbar-width: auto; }
     #flipbook { margin: 0 auto; }
     #flipbook .page { background: white; box-shadow: 0 0 20px rgba(0, 0, 0, 0.2); }
     #flipbook .page {
-        overflow: auto !important;
+        overflow: hidden !important;
         width: 100%;
         height: 100%;
         box-sizing: border-box;
     }
     #flipbook .page img {
-        width: auto;
-        height: auto;
-        max-width: none;
-        max-height: none;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
         display: block;
         image-rendering: crisp-edges;
         image-rendering: -webkit-optimize-contrast;
     }
     /* Side Navigation Buttons */
-    .side-nav-btn { position: absolute; top: 50%; transform: translateY(-50%); background: linear-gradient(135deg, #f5f105f6 0%, #faea08ef 100%); border: none; color: black; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 5px 20px rgba(246, 250, 18, 0.97); z-index: 100; }
+    .side-nav-btn { position: absolute; top: 50%; transform: translateY(-50%); background: linear-gradient(135deg, #f5f105f6 0%, #faea08ef 100%); border: none; color: black; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 5px 20px rgba(246, 250, 18, 0.97); z-index: 9995; }
     .side-nav-btn:hover:not(:disabled) { background: linear-gradient(135deg, #eccb12 0%, #f3f70be7 100%); transform: translateY(-50%) scale(1.1); }
     .side-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-    #prev-side-btn { position: fixed; left: 20px; }
-    #next-side-btn { position: fixed; right: 20px; }
+    #prev-side-btn { position: fixed; left: 20px; top: 50vh; transform: translateY(-50%); }
+    #next-side-btn { position: fixed; right: 20px; top: 50vh; transform: translateY(-50%); }
     .controls { position: relative; bottom: auto; left: auto; transform: none; background: linear-gradient(135deg, #125bfa 0%, #4083ff 100%); backdrop-filter: blur(10px); padding: 15px 25px; border-radius: 50px; display: flex; gap: 15px; align-items: center; box-shadow: 0 5px 30px rgba(250, 129, 18, 0.3); z-index: 9999; margin-bottom: 30px; flex-shrink: 0; }
     .control-btn { background: rgba(245, 210, 11, 0.99); border: none; color: white; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; font-size: 18px; }
     .control-btn:hover:not(:disabled) { background: rgba(255, 255, 255, 0.2); transform: scale(1.1); }
@@ -118,11 +83,11 @@
     @keyframes slideUp { from { transform: translateX(-50%) translateY(20px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
     @media (max-width: 768px) {
         .flipbook-viewer { top: 70px; }
-        .viewer-header { padding: 60px 15px; }
-        .viewer-header { margin: 0px 0px -53px; }
+        .viewer-header { padding: 24px 10px; }
         .viewer-title { font-size: 16px; }
-        .viewer-content { padding: 10px; flex-direction: column; overflow-x: auto; overflow-y: auto; }
-        .flipbook-container { max-width: none; max-height: none; padding: 0 10px; overflow: visible; }
+        .viewer-content { padding: 10px; flex-direction: column; overflow: hidden; }
+        .flipbook-container { max-width: none; max-height: none; padding: 0; overflow: hidden; }
+        #flipbook-pan { width: 100%; height: 100%; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; touch-action: pan-x; scrollbar-width: thin; }
         #prev-side-btn { display: flex !important; width: 40px; height: 40px; font-size: 16px; left: 10px; z-index: 1000; }
         #next-side-btn { display: flex !important; width: 40px; height: 40px; font-size: 16px; right: 10px; z-index: 1000; }
         .controls {
@@ -157,7 +122,7 @@
     }
     @media (max-width: 480px) {
         .flipbook-viewer { top: 60px; }
-        .flipbook-container { padding: 0 10px; max-height: 70vh; }
+        .flipbook-container { padding: 0 0px; max-height: 70vh; }
         #prev-side-btn { width: 38px; height: 38px; font-size: 14px; left: 8px; }
         #next-side-btn { width: 38px; height: 38px; font-size: 14px; right: 8px; }
         .controls {
@@ -234,10 +199,12 @@
         <div class="loading-spinner"><i class="fas fa-spinner"></i></div>
         <div class="flipbook-container" id="flipbook-wrapper" style="display: none;">
             <button class="side-nav-btn" id="prev-side-btn" title="Previous Page"><i class="fas fa-chevron-left"></i></button>
-            <div id="flipbook">
-                {% for page in pages_list %}
-                <div class="page" data-page="{{ forloop.counter }}"></div>
-                {% endfor %}
+            <div id="flipbook-pan">
+                <div id="flipbook">
+                    {% for page in pages_list %}
+                    <div class="page" data-page="{{ forloop.counter }}"></div>
+                    {% endfor %}
+                </div>
             </div>
             <button class="side-nav-btn" id="next-side-btn" title="Next Page"><i class="fas fa-chevron-right"></i></button>
         </div>
@@ -530,10 +497,35 @@ $(document).ready(function() {
         }
     }
     
+    function getFlipbookSize() {
+        const header = document.querySelector('.viewer-header');
+        const headerH = header ? header.offsetHeight : 50;
+        const navH = 80;
+        const padding = 20;
+        const isMobile = window.innerWidth <= 768;
+        const availH = window.innerHeight - navH - headerH - padding;
+        const screenW = window.innerWidth - padding;
+        if (isMobile) {
+            // Container = screen width (scroll viewport)
+            // Book = 1.6x wider so user can pan left/right with finger
+            return { width: Math.floor(screenW * 1.6), height: Math.floor(availH), containerWidth: Math.floor(screenW) };
+        } else {
+            // Desktop: 25% wider for zoomed book effect
+            const availW = screenW * 1.25;
+            return { width: Math.floor(availW), height: Math.floor(availH), containerWidth: Math.floor(availW) };
+        }
+    }
+
     function initFlipbook() {
         const isMobile = window.innerWidth <= 768;
-        const flipbookWidth = isMobile ? window.innerWidth * 1.4 : 1200;
-        const flipbookHeight = isMobile ? window.innerHeight * 0.85 : 1100;
+        const size = getFlipbookSize();
+        const flipbookWidth = size.width;
+        const flipbookHeight = size.height;
+        const containerWidth = size.containerWidth;
+
+        // Container clips adjacent pages; pan div scrolls within current page
+        $('#flipbook-wrapper').css({ width: containerWidth + 'px', height: flipbookHeight + 'px' });
+        $('#flipbook-pan').css({ width: containerWidth + 'px', height: flipbookHeight + 'px' });
         
         // Initialize turn.js first
         $("#flipbook").turn({
@@ -553,6 +545,11 @@ $(document).ready(function() {
                 turned: function(event, page, view) {
                     updatePageCounter(page);
                     loadSurroundingPages(page);
+                    // Re-center pan position on every page turn
+                    if (window.innerWidth <= 768) {
+                        const panEl = document.getElementById('flipbook-pan');
+                        if (panEl) panEl.scrollLeft = (panEl.scrollWidth - panEl.clientWidth) / 2;
+                    }
                 }
             }
         });
@@ -562,9 +559,18 @@ $(document).ready(function() {
         
         // After a delay, force turn.js to recalculate its dimensions
         setTimeout(function() {
-            $("#flipbook").turn("size", flipbookWidth, flipbookHeight);
+            const s = getFlipbookSize();
+            const cW = s.containerWidth;
+            $('#flipbook-wrapper').css({ width: cW + 'px', height: s.height + 'px' });
+            $('#flipbook-pan').css({ width: cW + 'px', height: s.height + 'px' });
+            $("#flipbook").turn("size", s.width, s.height);
             $("#flipbook").turn("page", 1);
-        }, 500);
+            // On mobile, center the book so user can pan both left and right
+            if (window.innerWidth <= 768) {
+                const extra = s.width - cW;
+                document.getElementById('flipbook-pan').scrollLeft = extra / 2;
+            }
+        }, 600);
         
         $('.loading-spinner').fadeOut();
         $('#flipbook-wrapper').fadeIn();
@@ -601,16 +607,16 @@ $(document).ready(function() {
         }
     });
     
-    const baseWidth = 900;
-    const baseHeight = 1000;
+    const baseSize = getFlipbookSize();
+    let baseWidth = baseSize.width;
+    let baseHeight = baseSize.height;
     
     $('#zoom-in').click(function() { if (currentZoom < 2) { currentZoom += 0.2; applyZoom(); } });
     $('#zoom-out').click(function() { if (currentZoom > 0.6) { currentZoom -= 0.2; applyZoom(); } });
     
     function applyZoom() {
-        const isMobile = window.innerWidth <= 768;
-        const newWidth = (isMobile ? window.innerWidth * 1.4 : baseWidth) * currentZoom;
-        const newHeight = (isMobile ? window.innerHeight * 0.85 : baseHeight) * currentZoom;
+        const newWidth = baseWidth * currentZoom;
+        const newHeight = baseHeight * currentZoom;
         
         // Dynamically resize the flipbook using turn.js
         try {
@@ -619,12 +625,18 @@ $(document).ready(function() {
             console.log("Zoom resize error:", e);
         }
         
-        // Adjust overflow based on zoom level
-        const viewerContent = $('#viewer-content');
-        viewerContent.css({
-            'overflow-y': 'auto',
-            'overflow-x': 'auto'
-        });
+        // Enable both axes scrolling when zoomed in, lock vertical when at default
+        const panEl2 = document.getElementById('flipbook-pan');
+        if (panEl2) {
+            if (currentZoom > 1.0) {
+                panEl2.style.overflowY = 'auto';
+                panEl2.style.touchAction = 'pan-x pan-y';
+            } else {
+                panEl2.style.overflowY = 'hidden';
+                panEl2.style.touchAction = 'pan-x';
+                panEl2.scrollTop = 0; // reset vertical scroll on zoom reset
+            }
+        }
     }
     $('#fullscreen').click(function() {
         const element = document.getElementById('viewer-content');
@@ -640,17 +652,86 @@ $(document).ready(function() {
         }
     });
     $(window).resize(function() {
-        const isMobile = window.innerWidth <= 768;
         try {
-            $("#flipbook").turn("size", 
-                isMobile ? window.innerWidth * 1.4 : 900,
-                isMobile ? window.innerHeight * 0.85 : 1000
-            );
+            const size = getFlipbookSize();
+            baseWidth = size.width;
+            baseHeight = size.height;
+            const cW = size.containerWidth;
+            $('#flipbook-wrapper').css({ width: cW + 'px', height: baseHeight + 'px' });
+            $('#flipbook-pan').css({ width: cW + 'px', height: baseHeight + 'px' });
+            $("#flipbook").turn("size", baseWidth * currentZoom, baseHeight * currentZoom);
+            // Re-center on mobile after resize
+            if (window.innerWidth <= 768) {
+                const extra = (baseWidth * currentZoom) - cW;
+                if (extra > 0) document.getElementById('flipbook-pan').scrollLeft = extra / 2;
+            }
         } catch(e) {
             console.log("Resize handling:", e);
         }
     });
     
+    // ===== PINCH-TO-ZOOM (MOBILE) =====
+    // Block browser native pinch-zoom entirely on this page
+    document.addEventListener('gesturestart', function(e) { e.preventDefault(); }, { passive: false });
+    document.addEventListener('gesturechange', function(e) { e.preventDefault(); }, { passive: false });
+    document.addEventListener('touchmove', function(e) {
+        if (e.touches.length > 1) e.preventDefault();
+    }, { passive: false });
+
+    (function() {
+        const panEl = document.getElementById('flipbook-pan');
+        if (!panEl) return;
+        let pinchStartDist = 0;
+        let pinchStartZoom = 1;
+        let isPinching = false;
+
+        function getDistance(touches) {
+            const dx = touches[0].clientX - touches[1].clientX;
+            const dy = touches[0].clientY - touches[1].clientY;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        panEl.addEventListener('touchstart', function(e) {
+            if (e.touches.length === 2) {
+                isPinching = true;
+                pinchStartDist = getDistance(e.touches);
+                pinchStartZoom = currentZoom;
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        panEl.addEventListener('touchmove', function(e) {
+            if (!isPinching || e.touches.length !== 2) return;
+            e.preventDefault();
+            const dist = getDistance(e.touches);
+            const ratio = dist / pinchStartDist;
+            let newZoom = pinchStartZoom * ratio;
+            // Clamp: max 2.0, min 1.0 (default — pinching out resets to default, not below)
+            newZoom = Math.min(2.0, Math.max(1.0, newZoom));
+            currentZoom = parseFloat(newZoom.toFixed(2));
+
+            // Save proportional scroll position before resize so view doesn't jump
+            const prevScrollH = panEl.scrollHeight || 1;
+            const prevScrollV = panEl.scrollHeight || 1;
+            const scrollRatioX = (panEl.scrollLeft + panEl.clientWidth / 2) / (panEl.scrollWidth || 1);
+            const scrollRatioY = (panEl.scrollTop + panEl.clientHeight / 2) / (panEl.scrollHeight || 1);
+
+            applyZoom();
+
+            // Restore proportional position after resize
+            requestAnimationFrame(function() {
+                const newScrollX = scrollRatioX * panEl.scrollWidth - panEl.clientWidth / 2;
+                const newScrollY = scrollRatioY * panEl.scrollHeight - panEl.clientHeight / 2;
+                panEl.scrollLeft = Math.max(0, newScrollX);
+                panEl.scrollTop = Math.max(0, newScrollY);
+            });
+        }, { passive: false });
+
+        panEl.addEventListener('touchend', function(e) {
+            if (e.touches.length < 2) isPinching = false;
+        });
+    })();
+
     // ===== BOOKMARK FUNCTIONALITY =====
     const bookId = "{{ book.id }}";
     const bookmarkStorageKey = `flipbook_bookmarks_${bookId}`;
