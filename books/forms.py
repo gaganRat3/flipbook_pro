@@ -47,13 +47,14 @@ from .models import UnlockRequest, FlipBook
 class UnlockRequestForm(forms.ModelForm):
     class Meta:
         model = UnlockRequest
-        fields = ['flipbook', 'candidate_full_name', 'date_of_birth', 'parents_mobile_number', 'marital_status', 'terms_accepted']
+        fields = ['flipbook', 'candidate_full_name', 'date_of_birth', 'parents_mobile_number', 'marital_status', 'payment_screenshot', 'terms_accepted']
         widgets = {
             'flipbook': forms.HiddenInput(),
             'candidate_full_name': forms.TextInput(attrs={'class': 'form-control'}),
             'date_of_birth': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'parents_mobile_number': forms.TextInput(attrs={'class': 'form-control', 'type': 'tel'}),
             'marital_status': forms.Select(attrs={'class': 'form-control'}),
+            'payment_screenshot': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
             'terms_accepted': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
@@ -62,3 +63,16 @@ class UnlockRequestForm(forms.ModelForm):
         if not terms:
             raise forms.ValidationError('You must accept the terms and conditions.')
         return terms
+    
+    def clean_payment_screenshot(self):
+        screenshot = self.cleaned_data.get('payment_screenshot')
+        if screenshot:
+            # Validate file size (max 5MB)
+            if screenshot.size > 5 * 1024 * 1024:
+                raise forms.ValidationError('Payment screenshot size must be less than 5MB.')
+            # Validate file type
+            valid_extensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp']
+            file_extension = screenshot.name.split('.')[-1].lower()
+            if file_extension not in valid_extensions:
+                raise forms.ValidationError('Invalid file format. Please upload: JPG, PNG, GIF, or BMP.')
+        return screenshot

@@ -1,0 +1,1018 @@
+{% extends 'base.html' %}
+
+{% block title %}Request Access - FlipBook{% endblock %}
+
+{% block content %}
+<style>
+  .unlock-request-container {
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+
+  .unlock-request-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .unlock-request-header i {
+    font-size: 60px;
+    color: #dc2626;
+    margin-bottom: 15px;
+    display: block;
+  }
+
+  .unlock-request-header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #333;
+    margin: 0 0 10px 0;
+  }
+
+  .unlock-request-header p {
+    font-size: 16px;
+    color: #666;
+    margin: 0;
+  }
+
+  .book-title-highlight {
+    color: #fa8112;
+    font-weight: 700;
+  }
+
+  .unlock-request-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    margin-bottom: 30px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 24px;
+  }
+
+  .form-group label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .required {
+    color: #dc2626;
+    font-weight: 700;
+  }
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    padding: 12px 14px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.3s ease;
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: #fa8112;
+    background: #fffbf7;
+    box-shadow: 0 0 0 3px rgba(250, 129, 18, 0.1);
+  }
+
+  .form-group input::placeholder,
+  .form-group textarea::placeholder {
+    color: #bbb;
+  }
+
+  .form-hint {
+    font-size: 12px;
+    color: #999;
+    margin-top: 4px;
+  }
+
+  .section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e5e7eb;
+  }
+
+  .section-divider {
+    margin: 30px 0;
+  }
+
+  /* Book Selection Styles */
+  .books-selection-section {
+    margin-bottom: 25px;
+  }
+
+  .books-category-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .books-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .book-checkbox-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+    background: #f9fafb;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .book-checkbox-item:hover {
+    border-color: #fa8112;
+    background: #fffbf7;
+    box-shadow: 0 2px 8px rgba(250, 129, 18, 0.1);
+  }
+
+  .book-checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #fa8112;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .book-checkbox:checked + .book-label {
+    color: #fa8112;
+    font-weight: 600;
+  }
+
+  .book-label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    cursor: pointer;
+    flex: 1;
+  }
+
+  .book-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .book-price {
+    font-size: 12px;
+    color: #fa8112;
+    font-weight: 700;
+  }
+
+  /* Payment Summary */
+  .payment-summary {
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    font-size: 14px;
+    color: #666;
+  }
+
+  .summary-label {
+    font-weight: 600;
+  }
+
+  .summary-value {
+    font-weight: 700;
+    color: #333;
+  }
+
+  .summary-row.summary-total {
+    border-top: 2px solid #e5e7eb;
+    padding-top: 12px;
+    margin-top: 12px;
+    font-size: 16px;
+  }
+
+  .summary-row.summary-total .summary-value {
+    color: #fa8112;
+    font-size: 18px;
+  }
+
+  /* QR Code Section */
+  .qr-section {
+    background: #f9fafb;
+    border: 2px dashed #e5e7eb;
+    border-radius: 8px;
+    padding: 25px;
+    text-align: center;
+    margin: 20px 0;
+  }
+
+  .qr-section i {
+    font-size: 40px;
+    color: #fa8112;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .qr-section p {
+    font-size: 14px;
+    color: #666;
+    margin: 0 0 15px 0;
+  }
+
+  .payment-amount-display {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    padding: 15px;
+    background: #fff3e0;
+    border-radius: 6px;
+    margin: 15px 0;
+    font-weight: 700;
+  }
+
+  .payment-label {
+    color: #666;
+    font-size: 14px;
+  }
+
+  .payment-amount {
+    color: #fa8112;
+    font-size: 22px;
+  }
+
+  .qr-code-image {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 6px;
+  }
+
+  /* File Upload */
+  .file-input {
+    display: none;
+  }
+
+  .file-upload-wrapper {
+    position: relative;
+  }
+
+  .file-upload-label {
+    display: block;
+    cursor: pointer;
+    padding: 30px 20px;
+    border: 2px dashed #e5e7eb;
+    border-radius: 8px;
+    background: #f9fafb;
+    transition: all 0.3s ease;
+    text-align: center;
+  }
+
+  .file-upload-label:hover {
+    border-color: #fa8112;
+    background: #fffbf7;
+  }
+
+  .file-input:focus + .file-upload-label {
+    border-color: #fa8112;
+    box-shadow: 0 0 0 3px rgba(250, 129, 18, 0.1);
+  }
+
+  .file-upload-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .file-upload-content i {
+    font-size: 32px;
+    color: #fa8112;
+  }
+
+  .file-upload-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .file-upload-hint {
+    font-size: 12px;
+    color: #999;
+  }
+
+  .file-preview {
+    margin-top: 15px;
+  }
+
+  .preview-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: #f3f4f6;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+  }
+
+  .preview-image {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+  }
+
+  .preview-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+  }
+
+  .preview-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    word-break: break-word;
+  }
+
+  .preview-size {
+    font-size: 12px;
+    color: #999;
+  }
+
+  .preview-remove {
+    background: #fecaca;
+    border: none;
+    color: #dc2626;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+  }
+
+  .preview-remove:hover {
+    background: #fca5a5;
+    transform: scale(1.1);
+  }
+
+  /* Form Checkbox */
+  .form-checkbox {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    margin: 20px 0;
+  }
+
+  .form-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #fa8112;
+  }
+
+  .form-checkbox label {
+    margin: 0;
+    cursor: pointer;
+  }
+
+  /* Form Actions */
+  .form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 30px;
+    justify-content: flex-end;
+  }
+
+  .btn-back,
+  .btn-submit {
+    padding: 12px 28px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .btn-back {
+    background: #f3f4f6;
+    color: #666;
+  }
+
+  .btn-back:hover {
+    background: #e5e7eb;
+    color: #333;
+  }
+
+  .btn-submit {
+    background: linear-gradient(135deg, #fa8112 0%, #ff9140 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(250, 129, 18, 0.3);
+  }
+
+  .btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(250, 129, 18, 0.4);
+  }
+
+  .btn-submit:active {
+    transform: translateY(0);
+  }
+
+  .success-message {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .success-message.show {
+    display: block;
+  }
+
+  .success-message i {
+    font-size: 60px;
+    color: #10b981;
+    margin-bottom: 15px;
+    display: block;
+  }
+
+  .success-message h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    margin: 0 0 10px 0;
+  }
+
+  .success-message p {
+    font-size: 14px;
+    color: #666;
+    margin: 8px 0;
+    line-height: 1.6;
+  }
+
+  .btn-back-home {
+    margin-top: 20px;
+    padding: 12px 30px;
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-block;
+    text-decoration: none;
+  }
+
+  .btn-back-home:hover {
+    background: #059669;
+  }
+
+  @media (max-width: 768px) {
+    .unlock-request-container {
+      margin: 20px auto;
+      padding: 0 15px;
+    }
+
+    .unlock-request-card {
+      padding: 20px;
+    }
+
+    .unlock-request-header h1 {
+      font-size: 24px;
+    }
+
+    .books-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+      flex-direction: column;
+    }
+
+    .btn-back,
+    .btn-submit {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
+
+<div class="unlock-request-container">
+  <div class="unlock-request-header">
+    <i class="fas fa-lock"></i>
+    <h1>Request Book Access</h1>
+    <p>Book: <span class="book-title-highlight">{{ book.title }}</span></p>
+  </div>
+
+  <div class="unlock-request-card">
+    <form id="unlockForm" method="POST">
+      {% csrf_token %}
+
+      <!-- Personal Information Section -->
+      <h3 class="section-title">Personal Information</h3>
+
+      <div class="form-group">
+        <label for="candidateFullName">Candidate Full Name <span class="required">*</span></label>
+        <input
+          type="text"
+          id="candidateFullName"
+          name="candidate_full_name"
+          placeholder="Enter your full name"
+          required
+        />
+        <small class="form-hint">Your complete name</small>
+      </div>
+
+      <div class="form-group">
+        <label for="dateOfBirth">Date of Birth <span class="required">*</span></label>
+        <input 
+          type="text" 
+          id="dateOfBirth" 
+          name="date_of_birth" 
+          placeholder="dd-mm-yyyy" 
+          required 
+          maxlength="10"
+          oninput="formatDateInput(this)"
+          onchange="calculateAge()"
+        />
+        <small class="form-hint">Your date of birth (dd-mm-yyyy)</small>
+        <div id="ageDisplay" style="margin-top: 8px; display: none; font-weight: 600; color: #667eea; font-size: 14px;">
+          Age: <span id="ageValue">0</span> years
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="parentsMobileNumber">Parents Mobile Number <span class="required">*</span></label>
+        <input
+          type="tel"
+          id="parentsMobileNumber"
+          name="parents_mobile_number"
+          placeholder="Enter parents mobile number"
+          required
+        />
+        <small class="form-hint">Contact number of parents/guardians</small>
+      </div>
+
+      <div class="form-group">
+        <label for="maritalStatus">Marital Status <span class="required">*</span></label>
+        <select id="maritalStatus" name="marital_status" required>
+          <option value="">-- Select Marital Status --</option>
+          <option value="single">Single</option>
+          <option value="married">Married</option>
+          <option value="divorced">Divorced</option>
+          <option value="widowed">Widowed</option>
+          <option value="other">Other</option>
+        </select>
+        <small class="form-hint">Please select your marital status</small>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- Book Selection Section -->
+      <h3 class="section-title">Select Books</h3>
+      <small class="form-hint" style="display: block; margin-bottom: 15px;">Select one or more books (₹300 per book)</small>
+
+      <!-- Girls Books Section -->
+      <div class="books-selection-section">
+        <h4 class="books-category-title"><i class="fas fa-heart" style="color: #ff6b6b;"></i> Girls Books</h4>
+        <div class="books-grid">
+          {% for book in all_books %}
+            {% if 'girl' in book.title|lower %}
+            <div class="book-checkbox-item">
+              <input 
+                type="checkbox" 
+                id="book_{{ book.id }}" 
+                name="selected_books" 
+                value="{{ book.id }}" 
+                data-price="300"
+                data-title="{{ book.title }}"
+                class="book-checkbox"
+                onchange="calculateTotal()"
+              >
+              <label for="book_{{ book.id }}" class="book-label">
+                <span class="book-title">{{ book.title }}</span>
+                <span class="book-price">₹300</span>
+              </label>
+            </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Boys Books Section -->
+      <div class="books-selection-section">
+        <h4 class="books-category-title"><i class="fas fa-mars" style="color: #4ecdc4;"></i> Boys Books</h4>
+        <div class="books-grid">
+          {% for book in all_books %}
+            {% if 'boy' in book.title|lower %}
+            <div class="book-checkbox-item">
+              <input 
+                type="checkbox" 
+                id="book_{{ book.id }}" 
+                name="selected_books" 
+                value="{{ book.id }}" 
+                data-price="300"
+                data-title="{{ book.title }}"
+                class="book-checkbox"
+                onchange="calculateTotal()"
+              >
+              <label for="book_{{ book.id }}" class="book-label">
+                <span class="book-title">{{ book.title }}</span>
+                <span class="book-price">₹300</span>
+              </label>
+            </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Payment Summary -->
+      <div class="payment-summary">
+        <div class="summary-row">
+          <span class="summary-label">Total Books Selected:</span>
+          <span class="summary-value" id="totalBooks">0</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Price per Book:</span>
+          <span class="summary-value">₹300</span>
+        </div>
+        <div class="summary-row summary-total">
+          <span class="summary-label">Total Amount:</span>
+          <span class="summary-value" id="totalAmount">₹0</span>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- Payment Section -->
+      <h3 class="section-title">Payment Information</h3>
+
+      <div class="form-group">
+        <label for="qrCode">Scan QR Code to Pay <span class="required">*</span></label>
+        <div class="qr-section">
+          <i class="fas fa-qrcode"></i>
+          <p>Scan the QR code below to complete your payment</p>
+          <div class="payment-amount-display">
+            <span class="payment-label">Amount to Pay:</span>
+            <span class="payment-amount" id="displayAmount">₹0</span>
+          </div>
+          <img
+            src="https://via.placeholder.com/200x200?text=QR+Code"
+            alt="Payment QR Code"
+            class="qr-code-image"
+          />
+        </div>
+        <small class="form-hint">Use your phone camera or QR code scanner</small>
+      </div>
+
+      <!-- Payment Screenshot -->
+      <div class="form-group">
+        <label for="paymentScreenshot">Upload Payment Screenshot <span class="required">*</span></label>
+        <div class="file-upload-wrapper">
+          <input 
+            type="file" 
+            id="paymentScreenshot" 
+            name="payment_screenshot" 
+            accept="image/*"
+            class="file-input"
+            onchange="handleFileSelect(this)"
+            required
+          />
+          <label for="paymentScreenshot" class="file-upload-label">
+            <div class="file-upload-content">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <span class="file-upload-text">Click to upload or drag & drop</span>
+              <span class="file-upload-hint">PNG, JPG, GIF, BMP (Max 5MB)</span>
+            </div>
+          </label>
+          <div id="filePreview" class="file-preview" style="display: none;">
+            <div class="preview-item">
+              <img id="previewImage" src="" alt="Preview" class="preview-image">
+              <div class="preview-info">
+                <span id="previewName" class="preview-name"></span>
+                <span id="previewSize" class="preview-size"></span>
+              </div>
+              <button type="button" class="preview-remove" onclick="clearFileInput()">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <small class="form-hint">Upload a screenshot of your payment as proof</small>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- Terms & Conditions -->
+      <div class="form-group form-checkbox">
+        <input type="checkbox" id="terms" name="terms" required />
+        <label for="terms">I agree to the terms and conditions <span class="required">*</span></label>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <a href="{% url 'home' %}" class="btn-back">
+          <i class="fas fa-arrow-left"></i> Back
+        </a>
+        <button type="submit" class="btn-submit">
+          <i class="fas fa-paper-plane"></i> Submit Request
+        </button>
+      </div>
+    </form>
+
+    <!-- Success Message -->
+    <div id="successMessage" class="success-message">
+      <i class="fas fa-check-circle"></i>
+      <h2>Request Submitted Successfully!</h2>
+      <p>Your access request has been submitted successfully.</p>
+      <p>Our admin team will review your request and you'll receive confirmation via email.</p>
+      <a href="{% url 'home' %}" class="btn-back-home">
+        <i class="fas fa-home"></i> Back to Home
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Hidden field for book ID
+  const bookId = "{{ book.id }}";
+
+  function formatDateInput(input) {
+    let value = input.value.replace(/\D/g, "");
+    
+    if (value.length > 0) {
+      if (value.length <= 2) {
+        input.value = value;
+      } else if (value.length <= 4) {
+        input.value = value.slice(0, 2) + "-" + value.slice(2);
+      } else {
+        input.value = value.slice(0, 2) + "-" + value.slice(2, 4) + "-" + value.slice(4, 8);
+      }
+    }
+  }
+
+  function calculateAge() {
+    const dobInput = document.getElementById("dateOfBirth").value;
+    const ageDisplay = document.getElementById("ageDisplay");
+    const ageValue = document.getElementById("ageValue");
+    
+    if (!dobInput || dobInput.trim() === "") {
+      ageDisplay.style.display = "none";
+      return;
+    }
+    
+    const parts = dobInput.split("-");
+    if (parts.length !== 3) {
+      ageDisplay.style.display = "none";
+      return;
+    }
+    
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10);
+    const year = parseInt(parts[2], 10);
+    
+    if (isNaN(day) || isNaN(month) || isNaN(year) || day < 1 || day > 31 || month < 1 || month > 12 || year < 1900) {
+      ageDisplay.style.display = "none";
+      return;
+    }
+    
+    const dob = new Date(year, month - 1, day);
+    const today = new Date();
+    
+    if (dob > today) {
+      ageDisplay.style.display = "none";
+      return;
+    }
+    
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+      age--;
+    }
+    
+    ageValue.textContent = age;
+    ageDisplay.style.display = "block";
+  }
+
+  function calculateTotal() {
+    const checkboxes = document.querySelectorAll('.book-checkbox:checked');
+    const totalBooks = checkboxes.length;
+    const totalAmount = totalBooks * 300;
+
+    document.getElementById('totalBooks').textContent = totalBooks;
+    document.getElementById('totalAmount').textContent = '₹' + totalAmount;
+    document.getElementById('displayAmount').textContent = '₹' + totalAmount;
+  }
+
+  function handleFileSelect(input) {
+    const file = input.files[0];
+    const preview = document.getElementById('filePreview');
+    const previewImage = document.getElementById('previewImage');
+    const previewName = document.getElementById('previewName');
+    const previewSize = document.getElementById('previewSize');
+
+    if (file) {
+      const maxSize = 5 * 1024 * 1024;
+      if (file.size > maxSize) {
+        alert('File size must be less than 5MB');
+        input.value = '';
+        preview.style.display = 'none';
+        return;
+      }
+
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp'];
+      if (!validTypes.includes(file.type)) {
+        alert('Please upload a valid image file (JPG, PNG, GIF, BMP)');
+        input.value = '';
+        preview.style.display = 'none';
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        previewImage.src = e.target.result;
+        previewName.textContent = file.name;
+        previewSize.textContent = (file.size / 1024).toFixed(2) + ' KB';
+        preview.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    } else {
+      preview.style.display = 'none';
+    }
+  }
+
+  function clearFileInput() {
+    document.getElementById('paymentScreenshot').value = '';
+    document.getElementById('filePreview').style.display = 'none';
+  }
+
+  document.getElementById("unlockForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const candidateName = document.getElementById("candidateFullName").value.trim();
+    const dateOfBirth = document.getElementById("dateOfBirth").value;
+    const parentsMobile = document.getElementById("parentsMobileNumber").value.trim();
+    const maritalStatus = document.getElementById("maritalStatus").value;
+    const selectedBooks = document.querySelectorAll('.book-checkbox:checked');
+    const paymentScreenshot = document.getElementById('paymentScreenshot').files[0];
+    const termsAccepted = document.getElementById("terms").checked;
+
+    if (!candidateName) {
+      alert("Please enter candidate full name");
+      return;
+    }
+
+    if (!dateOfBirth) {
+      alert("Please enter date of birth");
+      return;
+    }
+
+    const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
+    if (!dateRegex.test(dateOfBirth)) {
+      alert("Please enter a valid date in format dd-mm-yyyy");
+      return;
+    }
+
+    if (!parentsMobile) {
+      alert("Please enter parents mobile number");
+      return;
+    }
+
+    if (!maritalStatus) {
+      alert("Please select marital status");
+      return;
+    }
+
+    if (selectedBooks.length === 0) {
+      alert("Please select at least one book");
+      return;
+    }
+
+    if (!paymentScreenshot) {
+      alert("Please upload a payment screenshot");
+      return;
+    }
+
+    if (!termsAccepted) {
+      alert("Please accept the terms and conditions");
+      return;
+    }
+
+    const postData = new FormData();
+    postData.append("flipbook", bookId);
+    postData.append("candidate_full_name", candidateName);
+    postData.append("date_of_birth", convertDateFormat(dateOfBirth));
+    postData.append("parents_mobile_number", parentsMobile);
+    postData.append("marital_status", maritalStatus);
+    postData.append("payment_screenshot", paymentScreenshot);
+    postData.append("terms_accepted", "on");
+
+    selectedBooks.forEach(checkbox => {
+      postData.append("selected_books", checkbox.value);
+    });
+    postData.append("total_amount", selectedBooks.length * 300);
+
+    fetch("/unlock-request/", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": getCookie("csrftoken"),
+      },
+      body: postData,
+    })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        document.getElementById("unlockForm").style.display = "none";
+        document.getElementById("successMessage").classList.add("show");
+        setTimeout(() => {
+          window.location.href = "{% url 'home' %}";
+        }, 3000);
+      } else {
+        let errorMsg = "Request failed.";
+        if (data.errors) {
+          errorMsg = Object.values(data.errors).map((e) => e.join(" ")).join(" ");
+        } else if (data.error) {
+          errorMsg = data.error;
+        }
+        alert(errorMsg);
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      alert("An error occurred. Please try again.");
+    });
+  });
+
+  function convertDateFormat(dateStr) {
+    if (!dateStr || dateStr.trim() === "") {
+      return "";
+    }
+    const parts = dateStr.split("-");
+    if (parts.length !== 3) {
+      return dateStr;
+    }
+    const day = parts[0].padStart(2, '0');
+    const month = parts[1].padStart(2, '0');
+    const year = parts[2];
+    return year + "-" + month + "-" + day;
+  }
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  // Initialize
+  calculateTotal();
+</script>
+{% endblock %}

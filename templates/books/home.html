@@ -346,6 +346,8 @@
     .unlock-modal-content {
       position: relative;
       padding: 40px 30px;
+      max-height: 85vh;
+      overflow-y: auto;
     }
     .modal-close-btn {
       position: absolute;
@@ -553,6 +555,229 @@
     .btn-close-success:hover {
       background: #059669;
     }
+
+    /* Book Selection Styles */
+    .books-selection-section {
+      margin-bottom: 25px;
+    }
+    .books-category-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .books-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+    .book-checkbox-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px;
+      background: #f9fafb;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .book-checkbox-item:hover {
+      border-color: #fa8112;
+      background: #fffbf7;
+      box-shadow: 0 2px 8px rgba(250, 129, 18, 0.1);
+    }
+    .book-checkbox {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: #fa8112;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+    .book-checkbox:checked + .book-label {
+      color: #fa8112;
+      font-weight: 600;
+    }
+    .book-label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      cursor: pointer;
+      flex: 1;
+    }
+    .book-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+    }
+    .book-price {
+      font-size: 12px;
+      color: #fa8112;
+      font-weight: 700;
+    }
+
+    /* Payment Summary Styles */
+    .payment-summary {
+      margin-bottom: 20px;
+    }
+    .summary-card {
+      background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 15px;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      font-size: 14px;
+      color: #666;
+    }
+    .summary-label {
+      font-weight: 600;
+    }
+    .summary-value {
+      font-weight: 700;
+      color: #333;
+    }
+    .summary-row.summary-total {
+      border-top: 2px solid #e5e7eb;
+      padding-top: 12px;
+      margin-top: 8px;
+      font-size: 16px;
+    }
+    .summary-row.summary-total .summary-value {
+      color: #fa8112;
+      font-size: 18px;
+    }
+
+    /* Payment Amount Display in QR Section */
+    .payment-amount-display {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      background: #fff3e0;
+      border-radius: 6px;
+      margin: 10px 0;
+      font-weight: 700;
+    }
+    .payment-label {
+      color: #666;
+      font-size: 14px;
+    }
+    .payment-amount {
+      color: #fa8112;
+      font-size: 20px;
+    }
+
+    /* File Upload Styles */
+    .file-input {
+      display: none;
+    }
+    .file-upload-wrapper {
+      position: relative;
+    }
+    .file-upload-label {
+      display: block;
+      cursor: pointer;
+      padding: 30px 20px;
+      border: 2px dashed #e5e7eb;
+      border-radius: 8px;
+      background: #f9fafb;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+    .file-upload-label:hover {
+      border-color: #fa8112;
+      background: #fffbf7;
+    }
+    .file-input:focus + .file-upload-label {
+      border-color: #fa8112;
+      box-shadow: 0 0 0 3px rgba(250, 129, 18, 0.1);
+    }
+    .file-upload-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .file-upload-content i {
+      font-size: 32px;
+      color: #fa8112;
+    }
+    .file-upload-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+    }
+    .file-upload-hint {
+      font-size: 12px;
+      color: #999;
+    }
+
+    /* File Preview Styles */
+    .file-preview {
+      margin-top: 15px;
+    }
+    .preview-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: #f3f4f6;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+    }
+    .preview-image {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+    }
+    .preview-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+    .preview-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+      word-break: break-word;
+    }
+    .preview-size {
+      font-size: 12px;
+      color: #999;
+    }
+    .preview-remove {
+      background: #fecaca;
+      border: none;
+      color: #dc2626;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+    }
+    .preview-remove:hover {
+      background: #fca5a5;
+      transform: scale(1.1);
+    }
+
     @media (max-width: 768px) {
       .unlock-modal {
         max-width: 95%;
@@ -570,6 +795,15 @@
       .btn-cancel,
       .btn-submit {
         width: 100%;
+      }
+      .books-grid {
+        grid-template-columns: 1fr;
+      }
+      .payment-summary {
+        margin-bottom: 15px;
+      }
+      .summary-card {
+        padding: 12px;
       }
     }
 
@@ -603,12 +837,15 @@
     justify-content: center;
     box-shadow: 0 6px 20px rgba(59, 130, 246, 0.25);
     letter-spacing: 0.3px;
+    text-decoration: none;
   }
 
   .btn-unlock:hover {
     transform: translateY(-2px);
     box-shadow: 0 10px 28px rgba(59, 130, 246, 0.35);
     background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: white;
+    text-decoration: none;
   }
 
   .btn-unlock:active {
@@ -1213,12 +1450,12 @@
                 <div class="lock-content">
                   <i class="fas fa-lock"></i>
                   <span>Locked</span>
-                  <button
+                  <a
+                    href="{% url 'unlock_request_page' book.id %}"
                     class="btn-unlock"
-                    onclick="openUnlockModal({{ book.id }}, '{{ book.title }}')"
                   >
                     <i class="fas fa-credit-card"></i> Pay to Unlock
-                  </button>
+                  </a>
                 </div>
               </div>
             </div>
@@ -1338,6 +1575,124 @@
         <small class="form-hint">Please select your marital status</small>
       </div>
 
+      <!-- Book Selection Section -->
+      <div class="form-group">
+        <label>How Many Books Do You Want? <span class="required">*</span></label>
+        <small class="form-hint">Select one or more books (₹300 per book)</small>
+        
+        <!-- Girls Books Section -->
+        <div class="books-selection-section">
+          <h4 class="books-category-title"><i class="fas fa-heart" style="color: #ff6b6b;"></i> Girls Books</h4>
+          <div class="books-grid">
+            {% for book in books %}
+              {% if 'girl' in book.title|lower %}
+              <div class="book-checkbox-item">
+                <input 
+                  type="checkbox" 
+                  id="book_{{ book.id }}" 
+                  name="selected_books" 
+                  value="{{ book.id }}" 
+                  data-price="300"
+                  data-title="{{ book.title }}"
+                  class="book-checkbox"
+                  onchange="calculateTotal()"
+                >
+                <label for="book_{{ book.id }}" class="book-label">
+                  <span class="book-title">{{ book.title }}</span>
+                  <span class="book-price">₹300</span>
+                </label>
+              </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Boys Books Section -->
+        <div class="books-selection-section">
+          <h4 class="books-category-title"><i class="fas fa-mars" style="color: #4ecdc4;"></i> Boys Books</h4>
+          <div class="books-grid">
+            {% for book in books %}
+              {% if 'boy' in book.title|lower %}
+              <div class="book-checkbox-item">
+                <input 
+                  type="checkbox" 
+                  id="book_{{ book.id }}" 
+                  name="selected_books" 
+                  value="{{ book.id }}" 
+                  data-price="300"
+                  data-title="{{ book.title }}"
+                  class="book-checkbox"
+                  onchange="calculateTotal()"
+                >
+                <label for="book_{{ book.id }}" class="book-label">
+                  <span class="book-title">{{ book.title }}</span>
+                  <span class="book-price">₹300</span>
+                </label>
+              </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Summary -->
+      <div class="form-group payment-summary">
+        <div class="summary-card">
+          <div class="summary-row">
+            <span class="summary-label">Total Books Selected:</span>
+            <span class="summary-value" id="totalBooks">0</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Price per Book:</span>
+            <span class="summary-value">₹300</span>
+          </div>
+          <div class="summary-row summary-total">
+            <span class="summary-label">Total Amount:</span>
+            <span class="summary-value" id="totalAmount">₹0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Screenshot Upload -->
+      <div class="form-group">
+        <label for="paymentScreenshot"
+          >Upload Payment Screenshot <span class="required">*</span></label
+        >
+        <div class="file-upload-wrapper">
+          <input 
+            type="file" 
+            id="paymentScreenshot" 
+            name="payment_screenshot" 
+            accept="image/*"
+            class="file-input"
+            onchange="handleFileSelect(this)"
+            required
+          />
+          <label for="paymentScreenshot" class="file-upload-label">
+            <div class="file-upload-content">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <span class="file-upload-text">Click to upload or drag & drop</span>
+              <span class="file-upload-hint">PNG, JPG, GIF, BMP (Max 5MB)</span>
+            </div>
+          </label>
+          <div id="filePreview" class="file-preview" style="display: none;">
+            <div class="preview-item">
+              <img id="previewImage" src="" alt="Preview" class="preview-image">
+              <div class="preview-info">
+                <span id="previewName" class="preview-name"></span>
+                <span id="previewSize" class="preview-size"></span>
+              </div>
+              <button type="button" class="preview-remove" onclick="clearFileInput()">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <small class="form-hint"
+          >Upload a screenshot of your payment as proof</small
+        >
+      </div>
+
       <div class="form-group">
         <label for="qrCode"
           >Scan QR Code to Pay <span class="required">*</span></label
@@ -1345,6 +1700,10 @@
         <div class="qr-code-container">
           <i class="fas fa-qrcode"></i>
           <p>Scan the QR code below to complete your payment</p>
+          <div class="payment-amount-display">
+            <span class="payment-label">Amount to Pay:</span>
+            <span class="payment-amount" id="displayAmount">₹0</span>
+          </div>
           <!-- QR Code display area - you can add your QR code image here -->
           <img
             src="https://via.placeholder.com/200x200?text=QR+Code"
@@ -1398,7 +1757,6 @@
 <div
   id="unlockModalOverlay"
   class="unlock-modal-overlay"
-  onclick="closeUnlockModal()"
 ></div>
 
 {% block extra_js %}
@@ -1484,16 +1842,101 @@
     ageDisplay.style.display = "block";
   }
 
+  // Function to calculate total amount based on selected books
+  function calculateTotal() {
+    const checkboxes = document.querySelectorAll('.book-checkbox:checked');
+    const totalBooks = checkboxes.length;
+    const pricePerBook = 300;
+    const totalAmount = totalBooks * pricePerBook;
+
+    // Update counter
+    document.getElementById('totalBooks').textContent = totalBooks;
+
+    // Update total amount display
+    document.getElementById('totalAmount').textContent = '₹' + totalAmount;
+
+    // Update QR section display amount
+    document.getElementById('displayAmount').textContent = '₹' + totalAmount;
+
+    // Validate at least one book is selected when submitting
+    if (totalAmount === 0 && document.getElementById('unlockForm').style.display === 'flex') {
+      document.querySelector('.form-actions').style.opacity = '0.5';
+      document.querySelector('.btn-submit').disabled = true;
+    } else {
+      document.querySelector('.form-actions').style.opacity = '1';
+      document.querySelector('.btn-submit').disabled = false;
+    }
+  }
+
+  // File upload handler
+  function handleFileSelect(input) {
+    const file = input.files[0];
+    const preview = document.getElementById('filePreview');
+    const previewImage = document.getElementById('previewImage');
+    const previewName = document.getElementById('previewName');
+    const previewSize = document.getElementById('previewSize');
+
+    if (file) {
+      // Validate file size
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        alert('File size must be less than 5MB');
+        input.value = '';
+        preview.style.display = 'none';
+        return;
+      }
+
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp'];
+      if (!validTypes.includes(file.type)) {
+        alert('Please upload a valid image file (JPG, PNG, GIF, BMP)');
+        input.value = '';
+        preview.style.display = 'none';
+        return;
+      }
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        previewImage.src = e.target.result;
+        previewName.textContent = file.name;
+        previewSize.textContent = (file.size / 1024).toFixed(2) + ' KB';
+        preview.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    } else {
+      preview.style.display = 'none';
+    }
+  }
+
+  // Clear file input
+  function clearFileInput() {
+    document.getElementById('paymentScreenshot').value = '';
+    document.getElementById('filePreview').style.display = 'none';
+  }
+
   function openUnlockModal(bookId, bookTitle) {
     document.getElementById("bookId").value = bookId;
     document.getElementById("bookTitle").textContent = bookTitle;
     document.getElementById("unlockForm").reset();
+    
+    // Reset all book checkboxes
+    document.querySelectorAll('.book-checkbox').forEach(checkbox => {
+      checkbox.checked = false;
+    });
+    
+    // Reset file input and preview
+    clearFileInput();
+    
     document.getElementById("successMessage").style.display = "none";
     document.getElementById("unlockForm").style.display = "flex";
     document.getElementById("ageDisplay").style.display = "none";
     document.getElementById("unlockModal").classList.add("active");
     document.getElementById("unlockModalOverlay").classList.add("active");
     document.body.style.overflow = "hidden";
+    
+    // Initialize total calculation
+    calculateTotal();
   }
 
   function closeUnlockModal() {
@@ -1557,9 +2000,27 @@
       isSubmitting = false;
       return;
     }
+    
+    // Check if at least one book is selected
+    const selectedBooks = document.querySelectorAll('.book-checkbox:checked');
+    if (selectedBooks.length === 0) {
+      alert("Please select at least one book to unlock");
+      isSubmitting = false;
+      return;
+    }
+    
+    // Check if payment screenshot is uploaded
+    const paymentScreenshot = document.getElementById('paymentScreenshot').files[0];
+    if (!paymentScreenshot) {
+      alert("Please upload a payment screenshot");
+      isSubmitting = false;
+      return;
+    }
+    
     if (!formData.terms_agreed) {
       alert("Please accept the terms and conditions");
       isSubmitting = false;
+      return;
     }
     
     // Convert date format from dd-mm-yyyy to yyyy-mm-dd
@@ -1571,7 +2032,14 @@
     postData.append("date_of_birth", dateFormatted);
     postData.append("parents_mobile_number", formData.parents_mobile_number);
     postData.append("marital_status", formData.marital_status);
+    postData.append("payment_screenshot", paymentScreenshot);
     postData.append("terms_accepted", formData.terms_agreed ? "on" : "");
+    
+    // Append selected books
+    selectedBooks.forEach(checkbox => {
+      postData.append("selected_books", checkbox.value);
+    });
+    postData.append("total_amount", selectedBooks.length * 300);
     fetch("/unlock-request/", {
       method: "POST",
       headers: {

@@ -206,12 +206,29 @@ class UnlockRequest(models.Model):
     parents_mobile_number = models.CharField(max_length=20)
     marital_status = models.CharField(max_length=20, choices=MARITAL_STATUS_CHOICES)
     terms_accepted = models.BooleanField(default=False)
+    payment_screenshot = models.ImageField(upload_to='payment_screenshots/', null=True, blank=True)
     submitted_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, default='pending', choices=[('pending', 'Pending'), ('approved', 'Approved'), ('rejected', 'Rejected')])
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='unlock_requests')
 
     def __str__(self):
         return f"UnlockRequest({self.candidate_full_name}, {self.flipbook.title}, {self.status})"
+
+
+class UnlockRequestBook(models.Model):
+    """Store the selected books in an unlock request"""
+    unlock_request = models.ForeignKey(UnlockRequest, on_delete=models.CASCADE, related_name='selected_books_list')
+    flipbook = models.ForeignKey(FlipBook, on_delete=models.CASCADE)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=300)
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('unlock_request', 'flipbook')
+        verbose_name = 'Unlock Request Book'
+        verbose_name_plural = 'Unlock Request Books'
+
+    def __str__(self):
+        return f"{self.unlock_request.candidate_full_name} - {self.flipbook.title}"
 
 
 class UserLoginSession(models.Model):

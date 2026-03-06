@@ -6,7 +6,7 @@ from .forms import UsernameEmailAuthenticationForm, RegistrationForm
 from django.contrib.auth.models import User
 from django.contrib import messages
 import json
-from .models import FlipBook, BookView, Event, FlipBookAccess, UserProfile, UnlockRequest, UserLoginSession
+from .models import FlipBook, BookView, Event, FlipBookAccess, UserProfile, UnlockRequest, UserLoginSession, UnlockRequestBook
 
 
 def get_client_ip(request):
@@ -283,6 +283,20 @@ def flipbook_view(request, book_id):
     return render(request, 'books/flipbook.html', context)
 
 
+# Page view for unlock request form (non-AJAX)
+@login_required
+def unlock_request_page_view(request, book_id):
+    """Display unlock request form as a dedicated page"""
+    book = get_object_or_404(FlipBook, id=book_id, is_published=True)
+    all_books = FlipBook.objects.filter(is_published=True).order_by('title')
+    
+    context = {
+        'book': book,
+        'all_books': all_books,
+    }
+    return render(request, 'books/unlock_request.html', context)
+
+
 # Handle unlock request form submission (AJAX POST)
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
@@ -325,6 +339,21 @@ def unlock_request_view(request):
                 if request.user.is_authenticated:
                     unlock_request.user = request.user
                 unlock_request.save()
+                
+                # Save selected books
+                selected_books_ids = request.POST.getlist('selected_books')
+                if selected_books_ids:
+                    for book_id in selected_books_ids:
+                        try:
+                            selected_book = FlipBook.objects.get(id=int(book_id))
+                            UnlockRequestBook.objects.create(
+                                unlock_request=unlock_request,
+                                flipbook=selected_book,
+                                price=300
+                            )
+                        except (FlipBook.DoesNotExist, ValueError):
+                            print(f"Invalid book ID: {book_id}")
+                
                 return JsonResponse({'success': True, 'message': 'Request submitted successfully.'})
             else:
                 print(f"Form errors: {form.errors}")

@@ -13,21 +13,32 @@ class UserLoginSessionAdmin(admin.ModelAdmin):
     force_logout.short_description = "Force logout selected user sessions"
 from django.contrib import admin
 from .models import FlipBook, BookView, Event, FlipBookAccess, UserProfile
-from .models import UnlockRequest
+from .models import UnlockRequest, UnlockRequestBook
 from django.utils.html import format_html
 from django.contrib import messages
 
+class UnlockRequestBookInline(admin.TabularInline):
+    model = UnlockRequestBook
+    extra = 0
+    readonly_fields = ('added_at', 'price')
+    fields = ('flipbook', 'price', 'added_at')
+    can_delete = True
+
 @admin.register(UnlockRequest)
 class UnlockRequestAdmin(admin.ModelAdmin):
-    list_display = ('flipbook', 'candidate_full_name', 'date_of_birth', 'parents_mobile_number', 'marital_status', 'status', 'submitted_at', 'user')
+    list_display = ('flipbook', 'candidate_full_name', 'date_of_birth', 'parents_mobile_number', 'marital_status', 'status', 'submitted_at', 'user', 'total_books_count')
     list_filter = ('status', 'flipbook', 'marital_status', 'user')
     search_fields = ('candidate_full_name', 'parents_mobile_number')
-    readonly_fields = ('submitted_at',)
+    readonly_fields = ('submitted_at', 'payment_screenshot_preview')
     actions = ['mark_as_pending', 'mark_as_approved', 'mark_as_rejected']
+    inlines = [UnlockRequestBookInline]
     
     fieldsets = (
         ('Candidate Information', {
             'fields': ('flipbook', 'candidate_full_name', 'date_of_birth', 'parents_mobile_number', 'marital_status')
+        }),
+        ('Payment Information', {
+            'fields': ('payment_screenshot', 'payment_screenshot_preview')
         }),
         ('Request Status', {
             'fields': ('status', 'submitted_at', 'user')
@@ -36,6 +47,23 @@ class UnlockRequestAdmin(admin.ModelAdmin):
             'fields': ('terms_accepted',)
         }),
     )
+    
+    def total_books_count(self, obj):
+        """Display total number of books selected"""
+        count = obj.selected_books_list.count()
+        return f'{count} book{"s" if count != 1 else ""}'
+    total_books_count.short_description = 'Total Books Selected'
+    
+    def payment_screenshot_preview(self, obj):
+        """Display payment screenshot preview in admin"""
+        if obj.payment_screenshot:
+            return format_html(
+                '<img src="{}" style="max-width: 300px; max-height: 300px; border-radius: 8px; border: 1px solid #ddd;" />',
+                obj.payment_screenshot.url
+            )
+        return 'No screenshot uploaded'
+    payment_screenshot_preview.short_description = 'Payment Screenshot Preview'
+    payment_screenshot_preview.allow_tags = True
     
     # Custom Actions for Status Update
     def mark_as_pending(self, request, queryset):
@@ -254,6 +282,23 @@ class FlipBookAccessAdmin(admin.ModelAdmin):
 
 
 admin.site.register(FlipBookAccess, FlipBookAccessAdmin)
+
+@admin.register(UnlockRequestBook)
+class UnlockRequestBookAdmin(admin.ModelAdmin):
+    list_display = ['unlock_request', 'flipbook', 'price', 'added_at']
+    list_filter = ['added_at', 'flipbook']
+    search_fields = ['unlock_request__candidate_full_name', 'flipbook__title']
+    readonly_fields = ['added_at']
+    
+    fieldsets = (
+        ('Book Information', {
+            'fields': ('unlock_request', 'flipbook', 'price')
+        }),
+        ('Metadata', {
+            'fields': ('added_at',),
+            'classes': ('collapse',)
+        }),
+    )
 
 from django.core.paginator import Paginator
 @staff_member_required
