@@ -289,10 +289,11 @@ def unlock_request_page_view(request, book_id):
     """Display unlock request form as a dedicated page"""
     book = get_object_or_404(FlipBook, id=book_id, is_published=True)
     all_books = FlipBook.objects.filter(is_published=True).order_by('title')
-    
+    accessible_ids = list(FlipBookAccess.objects.filter(user=request.user).values_list('flipbook_id', flat=True))
     context = {
         'book': book,
         'all_books': all_books,
+        'accessible_ids': accessible_ids,
     }
     return render(request, 'books/unlock_request.html', context)
 

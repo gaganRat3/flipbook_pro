@@ -26,7 +26,21 @@ class UnlockRequestBookInline(admin.TabularInline):
 
 @admin.register(UnlockRequest)
 class UnlockRequestAdmin(admin.ModelAdmin):
-    list_display = ('flipbook', 'candidate_full_name', 'date_of_birth', 'parents_mobile_number', 'marital_status', 'status', 'submitted_at', 'user', 'total_books_count')
+    list_display = ('flipbook', 'candidate_full_name', 'date_of_birth', 'parents_mobile_number', 'marital_status', 'status', 'submitted_at', 'user', 'total_books_count', 'selected_books_titles', 'payment_screenshot_thumb')
+    def payment_screenshot_thumb(self, obj):
+        if obj.payment_screenshot:
+            return format_html(
+                '<img src="{}" style="max-width: 60px; max-height: 60px; border-radius: 4px; border: 1px solid #ddd;" />',
+                obj.payment_screenshot.url
+            )
+        return '-'
+    payment_screenshot_thumb.short_description = 'Screenshot'
+    payment_screenshot_thumb.allow_tags = True
+
+    def selected_books_titles(self, obj):
+        books = obj.selected_books_list.all()
+        return ", ".join([b.flipbook.title for b in books]) if books else "-"
+    selected_books_titles.short_description = 'Selected Books'
     list_filter = ('status', 'flipbook', 'marital_status', 'user')
     search_fields = ('candidate_full_name', 'parents_mobile_number')
     readonly_fields = ('submitted_at', 'payment_screenshot_preview')
@@ -283,22 +297,7 @@ class FlipBookAccessAdmin(admin.ModelAdmin):
 
 admin.site.register(FlipBookAccess, FlipBookAccessAdmin)
 
-@admin.register(UnlockRequestBook)
-class UnlockRequestBookAdmin(admin.ModelAdmin):
-    list_display = ['unlock_request', 'flipbook', 'price', 'added_at']
-    list_filter = ['added_at', 'flipbook']
-    search_fields = ['unlock_request__candidate_full_name', 'flipbook__title']
-    readonly_fields = ['added_at']
-    
-    fieldsets = (
-        ('Book Information', {
-            'fields': ('unlock_request', 'flipbook', 'price')
-        }),
-        ('Metadata', {
-            'fields': ('added_at',),
-            'classes': ('collapse',)
-        }),
-    )
+    # UnlockRequestBookAdmin removed to hide Unlock Request Books section
 
 from django.core.paginator import Paginator
 @staff_member_required

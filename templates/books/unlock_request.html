@@ -8,6 +8,8 @@
     max-width: 700px;
     margin: 40px auto;
     padding: 0 20px;
+    font-family: Verdana, sans-serif;
+    font-size: 22px;
   }
 
   .unlock-request-header {
@@ -16,23 +18,24 @@
   }
 
   .unlock-request-header i {
-    font-size: 60px;
+    font-size: 62px;
     color: #dc2626;
     margin-bottom: 15px;
     display: block;
   }
 
   .unlock-request-header h1 {
-    font-size: 32px;
+    font-size: 42px;
     font-weight: 700;
     color: #333;
     margin: 0 0 10px 0;
   }
 
   .unlock-request-header p {
-    font-size: 16px;
+    font-size: 20px;
     color: #666;
     margin: 0;
+     font-size: 22px;
   }
 
   .book-title-highlight {
@@ -55,7 +58,7 @@
   }
 
   .form-group label {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 600;
     color: #333;
     margin-bottom: 8px;
@@ -75,7 +78,7 @@
     padding: 12px 14px;
     border: 2px solid #e5e7eb;
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 16px;
     font-family: inherit;
     transition: all 0.3s ease;
   }
@@ -95,18 +98,188 @@
   }
 
   .form-hint {
-    font-size: 12px;
+    font-size: 14px;
     color: #999;
     margin-top: 4px;
   }
 
   .section-title {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 700;
     color: #333;
     margin-bottom: 20px;
     padding-bottom: 12px;
     border-bottom: 2px solid #e5e7eb;
+  }
+
+  /* Section Containers with Colors */
+  .form-section {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+
+  /* Personal Information Section - Blue */
+  .section-personal {
+    background: #EFF6FF;
+    border: 2px solid #3B82F6;
+  }
+
+  .section-personal .section-title {
+    color: #1E40AF;
+    border-bottom-color: #3B82F6;
+  }
+
+  .section-personal .form-group input:focus,
+  .section-personal .form-group select:focus,
+  .section-personal .form-group textarea:focus {
+    border-color: #3B82F6;
+    background: #DBEAFE;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  .section-personal label {
+    color: #1E40AF;
+  }
+
+  /* Select Books Section - Cyan */
+  .section-books-header {
+    background: #F0F9FF;
+    border: 2px solid #06B6D4;
+    margin-bottom: 24px;
+  }
+
+  .section-books-header .section-title {
+    color: #0E7490;
+    border-bottom-color: #06B6D4;
+  }
+
+  /* Girls Books Section - Pink */
+  .section-girls {
+    background: #FCE7F3;
+    border: 2px solid #EC4899;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .section-girls .books-category-title {
+    color: #BE185D;
+    border-bottom: 2px solid #EC4899;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+  }
+
+  .section-girls .book-checkbox-item {
+    background: #FBCFE8;
+    border-color: #EC4899;
+  }
+
+  .section-girls .book-checkbox-item:hover {
+    background: #F472B6;
+    border-color: #BE185D;
+  }
+
+  .section-girls .book-checkbox {
+    accent-color: #EC4899;
+  }
+
+  .section-girls .book-price {
+    color: #BE185D;
+  }
+
+  /* Boys Books Section - Green */
+  .section-boys {
+    background: #F0FDF4;
+    border: 2px solid #22C55E;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .section-boys .books-category-title {
+    color: #166534;
+    border-bottom: 2px solid #22C55E;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+  }
+
+  .section-boys .book-checkbox-item {
+    background: #DCFCE7;
+    border-color: #22C55E;
+  }
+
+  .section-boys .book-checkbox-item:hover {
+    background: #86EFAC;
+    border-color: #166534;
+  }
+
+  .section-boys .book-checkbox {
+    accent-color: #22C55E;
+  }
+
+  .section-boys .book-price {
+    color: #166534;
+  }
+
+  /* Total Section - Amber */
+  .section-total {
+    background: #FFFBEB;
+    border: 2px solid #F59E0B;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 24px 0;
+  }
+
+  .section-total .summary-row.summary-total .summary-value {
+    color: #EA580C;
+    font-size: 20px;
+  }
+
+  .section-total .summary-row.summary-total {
+    border-top-color: #F59E0B;
+  }
+
+  /* Payment Information Section - Purple */
+  .section-payment {
+    background: #FAF5FF;
+    border: 2px solid #A855F7;
+  }
+
+  .section-payment .section-title {
+    color: #6B21A8;
+    border-bottom-color: #A855F7;
+  }
+
+  .section-payment .form-group input:focus,
+  .section-payment .form-group textarea:focus {
+    border-color: #A855F7;
+    background: #F3E8FF;
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+  }
+
+  .section-payment label {
+    color: #6B21A8;
+  }
+
+  .qr-section {
+    background: #F3E8FF;
+    border: 2px dashed #A855F7;
+  }
+
+  .qr-section i {
+    color: #A855F7;
+  }
+
+  .payment-amount-display {
+    background: #F0F9FF;
+    border: 2px solid #06B6D4;
+  }
+
+  .payment-amount-display .payment-amount {
+    color: #A855F7;
   }
 
   .section-divider {
@@ -119,7 +292,7 @@
   }
 
   .books-category-title {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 700;
     color: #333;
     margin-bottom: 15px;
@@ -175,21 +348,21 @@
   }
 
   .book-title {
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 600;
     color: #333;
   }
 
   .book-price {
-    font-size: 12px;
+    font-size: 14px;
     color: #fa8112;
     font-weight: 700;
   }
 
   /* Payment Summary */
   .payment-summary {
-    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-    border: 2px solid #e5e7eb;
+    background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+    border: 2px solid #F59E0B;
     border-radius: 8px;
     padding: 20px;
     margin: 20px 0;
@@ -200,7 +373,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 10px 0;
-    font-size: 14px;
+    font-size: 16px;
     color: #666;
   }
 
@@ -217,11 +390,11 @@
     border-top: 2px solid #e5e7eb;
     padding-top: 12px;
     margin-top: 12px;
-    font-size: 16px;
+    font-size: 18px;
   }
 
   .summary-row.summary-total .summary-value {
-    color: #fa8112;
+    color: #EA580C;
     font-size: 18px;
   }
 
@@ -243,7 +416,7 @@
   }
 
   .qr-section p {
-    font-size: 14px;
+    font-size: 16px;
     color: #666;
     margin: 0 0 15px 0;
   }
@@ -262,12 +435,12 @@
 
   .payment-label {
     color: #666;
-    font-size: 14px;
+    font-size: 16px;
   }
 
   .payment-amount {
     color: #fa8112;
-    font-size: 22px;
+    font-size: 24px;
   }
 
   .qr-code-image {
@@ -319,13 +492,13 @@
   }
 
   .file-upload-text {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 600;
     color: #333;
   }
 
   .file-upload-hint {
-    font-size: 12px;
+    font-size: 14px;
     color: #999;
   }
 
@@ -359,14 +532,14 @@
   }
 
   .preview-name {
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 600;
     color: #333;
     word-break: break-word;
   }
 
   .preview-size {
-    font-size: 12px;
+    font-size: 14px;
     color: #999;
   }
 
@@ -423,7 +596,7 @@
     padding: 12px 28px;
     border: none;
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 600;
     cursor: pointer;
     display: flex;
@@ -468,21 +641,21 @@
   }
 
   .success-message i {
-    font-size: 60px;
+    font-size: 62px;
     color: #10b981;
     margin-bottom: 15px;
     display: block;
   }
 
   .success-message h2 {
-    font-size: 24px;
+    font-size: 26px;
     font-weight: 700;
     color: #333;
     margin: 0 0 10px 0;
   }
 
   .success-message p {
-    font-size: 14px;
+    font-size: 16px;
     color: #666;
     margin: 8px 0;
     line-height: 1.6;
@@ -539,8 +712,8 @@
 <div class="unlock-request-container">
   <div class="unlock-request-header">
     <i class="fas fa-lock"></i>
-    <h1>Request Book Access</h1>
-    <p>Book: <span class="book-title-highlight">{{ book.title }}</span></p>
+    <h1>Request Flipbook Library - (Bhudev Store) Access</h1>
+    <p>Fillup below information for purchase of Flipbooks</p>
   </div>
 
   <div class="unlock-request-card">
@@ -548,7 +721,8 @@
       {% csrf_token %}
 
       <!-- Personal Information Section -->
-      <h3 class="section-title">Personal Information</h3>
+      <div class="form-section section-personal">
+        <h3 class="section-title"><i class="fas fa-user" style="color: #1E40AF; margin-right: 8px;"></i>Personal Information</h3>
 
       <div class="form-group">
         <label for="candidateFullName">Candidate Full Name <span class="required">*</span></label>
@@ -604,69 +778,88 @@
         </select>
         <small class="form-hint">Please select your marital status</small>
       </div>
+      </div><!-- End Personal Information Section -->
 
       <div class="section-divider"></div>
 
       <!-- Book Selection Section -->
-      <h3 class="section-title">Select Books</h3>
-      <small class="form-hint" style="display: block; margin-bottom: 15px;">Select one or more books (₹300 per book)</small>
+      <div class="form-section section-books-header">
+        <h3 class="section-title"><i class="fas fa-book" style="color: #0E7490; margin-right: 8px;"></i>Select Books</h3>
+        <small class="form-hint" style="display: block; margin-bottom: 0;">Select one or more books (₹300 per book)</small>
+      </div>
 
       <!-- Girls Books Section -->
-      <div class="books-selection-section">
-        <h4 class="books-category-title"><i class="fas fa-heart" style="color: #ff6b6b;"></i> Girls Books</h4>
+      <div class="section-girls">
+        <h4 class="books-category-title"><i class="fas fa-heart" style="color: #EC4899;"></i> Girls Books</h4>
         <div class="books-grid">
           {% for book in all_books %}
             {% if 'girl' in book.title|lower %}
             <div class="book-checkbox-item">
-              <input 
-                type="checkbox" 
-                id="book_{{ book.id }}" 
-                name="selected_books" 
-                value="{{ book.id }}" 
-                data-price="300"
-                data-title="{{ book.title }}"
-                class="book-checkbox"
-                onchange="calculateTotal()"
-              >
-              <label for="book_{{ book.id }}" class="book-label">
-                <span class="book-title">{{ book.title }}</span>
-                <span class="book-price">₹300</span>
-              </label>
+              {% if book.id in accessible_ids %}
+                <div class="book-label" style="color: #aaa;">
+                  <span class="book-title">{{ book.title }}</span>
+                  <span class="book-price">₹300</span>
+                  <span style="color: #dc2626; font-weight: 600; font-size: 13px;">Already accessible</span>
+                </div>
+              {% else %}
+                <input 
+                  type="checkbox" 
+                  id="book_{{ book.id }}" 
+                  name="selected_books" 
+                  value="{{ book.id }}" 
+                  data-price="300"
+                  data-title="{{ book.title }}"
+                  class="book-checkbox"
+                  onchange="calculateTotal()"
+                >
+                <label for="book_{{ book.id }}" class="book-label">
+                  <span class="book-title">{{ book.title }}</span>
+                  <span class="book-price">₹300</span>
+                </label>
+              {% endif %}
             </div>
             {% endif %}
           {% endfor %}
         </div>
-      </div>
+      </div><!-- End Girls Books Section -->
 
       <!-- Boys Books Section -->
-      <div class="books-selection-section">
-        <h4 class="books-category-title"><i class="fas fa-mars" style="color: #4ecdc4;"></i> Boys Books</h4>
+      <div class="section-boys">
+        <h4 class="books-category-title"><i class="fas fa-mars" style="color: #22C55E;"></i> Boys Books</h4>
         <div class="books-grid">
           {% for book in all_books %}
             {% if 'boy' in book.title|lower %}
             <div class="book-checkbox-item">
-              <input 
-                type="checkbox" 
-                id="book_{{ book.id }}" 
-                name="selected_books" 
-                value="{{ book.id }}" 
-                data-price="300"
-                data-title="{{ book.title }}"
-                class="book-checkbox"
-                onchange="calculateTotal()"
-              >
-              <label for="book_{{ book.id }}" class="book-label">
-                <span class="book-title">{{ book.title }}</span>
-                <span class="book-price">₹300</span>
-              </label>
+              {% if book.id in accessible_ids %}
+                <div class="book-label" style="color: #aaa;">
+                  <span class="book-title">{{ book.title }}</span>
+                  <span class="book-price">₹300</span>
+                  <span style="color: #dc2626; font-weight: 600; font-size: 13px;">Already accessible</span>
+                </div>
+              {% else %}
+                <input 
+                  type="checkbox" 
+                  id="book_{{ book.id }}" 
+                  name="selected_books" 
+                  value="{{ book.id }}" 
+                  data-price="300"
+                  data-title="{{ book.title }}"
+                  class="book-checkbox"
+                  onchange="calculateTotal()"
+                >
+                <label for="book_{{ book.id }}" class="book-label">
+                  <span class="book-title">{{ book.title }}</span>
+                  <span class="book-price">₹300</span>
+                </label>
+              {% endif %}
             </div>
             {% endif %}
           {% endfor %}
         </div>
-      </div>
+      </div><!-- End Boys Books Section -->
 
       <!-- Payment Summary -->
-      <div class="payment-summary">
+      <div class="section-total payment-summary">
         <div class="summary-row">
           <span class="summary-label">Total Books Selected:</span>
           <span class="summary-value" id="totalBooks">0</span>
@@ -679,12 +872,13 @@
           <span class="summary-label">Total Amount:</span>
           <span class="summary-value" id="totalAmount">₹0</span>
         </div>
-      </div>
+      </div><!-- End Payment Summary -->
 
       <div class="section-divider"></div>
 
       <!-- Payment Section -->
-      <h3 class="section-title">Payment Information</h3>
+      <div class="form-section section-payment">
+        <h3 class="section-title"><i class="fas fa-credit-card" style="color: #6B21A8; margin-right: 8px;"></i>Payment Information</h3>
 
       <div class="form-group">
         <label for="qrCode">Scan QR Code to Pay <span class="required">*</span></label>
@@ -739,6 +933,7 @@
         </div>
         <small class="form-hint">Upload a screenshot of your payment as proof</small>
       </div>
+      </div><!-- End Payment Section -->
 
       <div class="section-divider"></div>
 
