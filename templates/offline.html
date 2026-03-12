@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - bhudevstore</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .offline-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 60px 40px;
+            max-width: 500px;
+            text-align: center;
+        }
+        
+        .offline-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+        
+        p {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        .offline-tips {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+        
+        .offline-tips h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .offline-tips ul {
+            list-style: none;
+        }
+        
+        .offline-tips li {
+            color: #666;
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .offline-tips li:before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        button, a {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            border: 2px solid #ddd;
+        }
+        
+        .btn-secondary:hover {
+            background: #e8e8e8;
+            border-color: #667eea;
+        }
+        
+        .retry-status {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-icon">📡</div>
+        <h1>You're Offline</h1>
+        <p>It looks like you've lost your internet connection. Don't worry! You can still access previously viewed books and content.</p>
+        
+        <div class="offline-tips">
+            <h3>What you can do:</h3>
+            <ul>
+                <li>View books you've already opened</li>
+                <li>Access cached pages</li>
+                <li>Check your downloaded content</li>
+            </ul>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="btn-primary" onclick="goHome()">Go to Home</button>
+            <button class="btn-secondary" onclick="retryConnection()">Retry Connection</button>
+        </div>
+        
+        <div class="retry-status" id="retryStatus"></div>
+    </div>
+    
+    <script>
+        function goHome() {
+            window.location.href = '/';
+        }
+        
+        function retryConnection() {
+            fetch('/').then(() => {
+                document.getElementById('retryStatus').textContent = '✓ Connection restored!';
+                document.getElementById('retryStatus').style.color = '#10b981';
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            }).catch(() => {
+                document.getElementById('retryStatus').textContent = '✗ Still offline. Try again in a moment.';
+                document.getElementById('retryStatus').style.color = '#ef4444';
+            });
+        }
+        
+        // Periodically check connection
+        setInterval(() => {
+            fetch('/').then(() => {
+                document.getElementById('retryStatus').textContent = '✓ Connection restored!';
+                document.getElementById('retryStatus').style.color = '#10b981';
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            }).catch(() => {
+                // Still offline
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

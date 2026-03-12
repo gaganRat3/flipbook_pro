@@ -12,4 +12,5 @@ urlpatterns = [
     path('debug/access/', views.debug_access_view, name='debug_access'),
     path('active-sessions/', views.active_sessions_view, name='active_sessions'),
     path('logout-session/<int:session_id>/', views.logout_other_session, name='logout_session'),
+    path('offline/', views.offline_view, name='offline'),
 ]

@@ -5,12 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}FlipBook{% endblock %}</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#2c3e50">
+    <meta name="description" content="Flipbook application for book viewing and management">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="bhudevstore">
+    {% load static %}
+    <link rel="manifest" href="{% static 'manifest.json' %}">
     <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    {% load static %}
     <link rel="stylesheet" href="{% static 'css/filters.css' %}">
-    {% block extra_css %}{% endblock %}
+        {% block extra_css %}{% endblock %}
+        <script>
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                        navigator.serviceWorker.register('/service-worker.js')
+                        .then(function(registration) {
+                            console.log('ServiceWorker registration successful:', registration.scope);
+                        })
+                        .catch(function(error) {
+                            console.error('ServiceWorker registration failed:', error);
+                        });
+                });
+            }
+        </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -105,6 +125,8 @@
                 {% else %}
                     {% comment %} <a href="{% url 'login' %}" class="btn btn-primary"></i> Login</a> {% endcomment %}
                 {% endif %}
+                <!-- PWA Install Button -->
+                <button id="pwa-install-btn" class="btn btn-secondary" style="display:none; margin-left: 10px;">Install App</button>
             </div>
         </div>
     </nav>
@@ -121,6 +143,40 @@
             const messages = document.querySelector('.messages');
             if (messages) { messages.style.transition = 'opacity 0.5s'; messages.style.opacity = '0'; setTimeout(() => messages.remove(), 500); }
         }, 5000);
+    </script>
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+        // Handled by the registration block in <head>
+        
+        // Prompt for PWA installation on compatible browsers
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show installation button/prompt
+            const installButton = document.getElementById('pwa-install-btn');
+            if (installButton) {
+                installButton.style.display = 'block';
+                installButton.addEventListener('click', () => {
+                    installButton.disabled = true;
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        deferredPrompt.userChoice.then((choiceResult) => {
+                            installButton.disabled = false;
+                            installButton.style.display = 'none';
+                            deferredPrompt = null;
+                        });
+                    }
+                });
+            }
+        });
+        
+        // Handle app installed
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA was installed successfully');
+        });
     </script>
     {% block extra_js %}{% endblock %}
 </body>

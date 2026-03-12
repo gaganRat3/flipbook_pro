@@ -9,6 +9,10 @@ import json
 from .models import FlipBook, BookView, Event, FlipBookAccess, UserProfile, UnlockRequest, UserLoginSession, UnlockRequestBook
 
 
+def offline_view(request):
+    return render(request, 'offline.html')
+
+
 def get_client_ip(request):
     """Get client IP address"""
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
