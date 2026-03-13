@@ -171,6 +171,22 @@ def logout_view(request):
 @login_required
 def home_view(request):
     """Home page - list only flipbooks user can access, with event, gender, and category filtering"""
+    # Ensure session key exists
+    if not request.session.session_key:
+        request.session.create()
+    # Ensure UserLoginSession exists for authenticated user
+    from .models import UserLoginSession
+    if request.user.is_authenticated:
+        session_key = request.session.session_key
+        if not UserLoginSession.objects.filter(user=request.user, session_key=session_key).exists():
+            ip_address = request.META.get('REMOTE_ADDR', '')
+            user_agent = request.META.get('HTTP_USER_AGENT', '')
+            UserLoginSession.objects.create(
+                user=request.user,
+                session_key=session_key,
+                ip_address=ip_address,
+                user_agent=user_agent
+            )
     accessible_ids = list(FlipBookAccess.objects.filter(user=request.user).values_list('flipbook_id', flat=True))
     books = FlipBook.objects.filter(is_published=True)
     events = Event.objects.filter(is_active=True)
