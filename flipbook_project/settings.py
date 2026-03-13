@@ -1,3 +1,6 @@
+# Session security settings
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_SECURE = True
 """
 Django settings for flipbook_project.
 """
@@ -11,13 +14,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Security
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-this-in-production')
 DEBUG = config('DEBUG', default=True, cast=bool)
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '58039ee8d1df.ngrok-free.app', '4482-103-241-224-69.ngrok-free.app', 'keyla-mirier-pebbly.ngrok-free.dev']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '58039ee8d1df.ngrok-free.app', '4482-103-241-224-69.ngrok-free.app', 'keyla-mirier-pebbly.ngrok-free.dev', 'bhudevstore.com']
 
 # CSRF trusted origins for ngrok
-CSRF_TRUSTED_ORIGINS = ['https://58039ee8d1df.ngrok-free.app', 'https://4482-103-241-224-69.ngrok-free.app', 'https://keyla-mirier-pebbly.ngrok-free.dev']
+CSRF_TRUSTED_ORIGINS = ['https://58039ee8d1df.ngrok-free.app', 'https://4482-103-241-224-69.ngrok-free.app', 'https://keyla-mirier-pebbly.ngrok-free.dev','https://bhudevstore.com']
 
 # CSRF cookie settings for production
-CSRF_COOKIE_SECURE = False  # Set to True if using HTTPS in production
+CSRF_COOKIE_SECURE = True  # Set to True if using HTTPS in production
 CSRF_COOKIE_SAMESITE = 'Lax'
 
 # Application definition

@@ -303,14 +303,37 @@ def unlock_request_page_view(request, book_id):
 
 
 # Handle unlock request form submission (AJAX POST)
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_protect
 from django.http import JsonResponse
 from .forms import UnlockRequestForm
 from datetime import datetime
 
-@csrf_exempt  # If you use AJAX, ensure CSRF token is handled in JS; otherwise, remove this and use @require_POST
+@csrf_protect
 def unlock_request_view(request):
     if request.method == 'POST':
+        # For AJAX: Ensure CSRF token is sent in the X-CSRFToken header.
+        # Example JS:
+        # function getCookie(name) {
+        #     let cookieValue = null;
+        #     if (document.cookie && document.cookie !== '') {
+        #         const cookies = document.cookie.split(';');
+        #         for (let i = 0; i < cookies.length; i++) {
+        #             const cookie = cookies[i].trim();
+        #             if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        #                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        #                 break;
+        #             }
+        #         }
+        #     }
+        #     return cookieValue;
+        # }
+        # $.ajaxSetup({
+        #     beforeSend: function(xhr, settings) {
+        #         if (!(/^GET|HEAD|OPTIONS|TRACE$/.test(settings.type)) && !this.crossDomain) {
+        #             xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+        #         }
+        #     }
+        # });
         try:
             data = request.POST.copy()
             files = request.FILES.copy()
