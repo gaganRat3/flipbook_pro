@@ -1,23 +1,28 @@
-// Service Worker for bhudevstore PWA
-const CACHE_NAME = 'bhudevstore-v1';
-const STATIC_CACHE = 'bhudevstore-static-v1';
-const DYNAMIC_CACHE = 'bhudevstore-dynamic-v1';
-const IMAGE_CACHE = 'bhudevstore-images-v1';
+// service-worker.js for Django static
+self.addEventListener('install', event => {
+  self.skipWaiting();
+});
 
-// Files to cache on install
-const STATIC_FILES = [
-  '/',
-  '/static/admin/js/event_admin.js',
-  '/static/manifest.json',
-  '/templates/base.html',
-  '/templates/books/home.html',
-  '/templates/books/login.html',
-  '/templates/books/register.html',
-];
+self.addEventListener('activate', event => {
+  event.waitUntil(clients.claim());
+});
 
-// Install event - cache static files
-self.addEventListener('install', (event) => {
-  console.log('Service Worker: Installing...');
+// Only cache static assets, do not intercept all fetch requests
+self.addEventListener('fetch', event => {
+  if (event.request.url.includes('/static/')) {
+    event.respondWith(
+      caches.open('static-v1').then(cache => {
+        return cache.match(event.request).then(response => {
+          return response || fetch(event.request).then(networkResponse => {
+            cache.put(event.request, networkResponse.clone());
+            return networkResponse;
+          });
+        });
+      })
+    );
+  }
+  // For other requests, let the network handle them
+});
   event.waitUntil(
     caches.open(STATIC_CACHE).then((cache) => {
       console.log('Service Worker: Caching static files');
