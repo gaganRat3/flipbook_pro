@@ -48,9 +48,15 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event - serve cached files
 self.addEventListener('fetch', (event) => {
+  // Defensive fix for only-if-cached error
+  const fetchOptions = {};
+  if (event.request.cache === 'only-if-cached') {
+    fetchOptions.cache = 'only-if-cached';
+    fetchOptions.mode = 'same-origin';
+  }
   event.respondWith(
     caches.match(event.request).then((response) => {
-      return response || fetch(event.request).then((fetchResponse) => {
+      return response || fetch(event.request, fetchOptions).then((fetchResponse) => {
         return caches.open(DYNAMIC_CACHE).then((cache) => {
           cache.put(event.request, fetchResponse.clone());
           return fetchResponse;
