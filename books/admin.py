@@ -92,9 +92,18 @@ class UnlockRequestAdmin(admin.ModelAdmin):
     mark_as_pending.short_description = '✓ Mark as Pending'
     
     def mark_as_approved(self, request, queryset):
-        """Mark selected unlock requests as approved"""
-        updated = queryset.update(status='approved')
-        self.message_user(request, f'{updated} request(s) marked as Approved.')
+        """Mark selected unlock requests as approved and grant access"""
+        from .models import FlipBookAccess
+        approved_count = 0
+        for unlock_request in queryset:
+            if unlock_request.status != 'approved':
+                unlock_request.status = 'approved'
+                unlock_request.save()
+                approved_count += 1
+            # Grant access if not already granted
+            if unlock_request.user:
+                FlipBookAccess.objects.get_or_create(user=unlock_request.user, flipbook=unlock_request.flipbook)
+        self.message_user(request, f'{approved_count} request(s) marked as Approved and access granted.')
     mark_as_approved.short_description = '✓ Mark as Approved'
     
     def mark_as_rejected(self, request, queryset):

@@ -38,21 +38,21 @@ class SessionValidationMiddleware:
         ]
     
     def __call__(self, request):
-        # Check if user is authenticated and session should be validated
+        # Never affect admin users or admin URLs
         if request.user.is_authenticated:
+            if request.user.is_staff or request.user.is_superuser:
+                return self.get_response(request)
             # Skip validation for certain paths to avoid issues
             if not any(request.path.startswith(path) for path in self.excluded_paths):
                 try:
                     from books.models import UserLoginSession
                     session_key = request.session.session_key
-                    
                     if session_key:
                         # Check if UserLoginSession record still exists
                         session_exists = UserLoginSession.objects.filter(
                             user=request.user,
                             session_key=session_key
                         ).exists()
-                        
                         if not session_exists:
                             # Session was deleted by admin, logout this user
                             logger.warning(
@@ -60,11 +60,7 @@ class SessionValidationMiddleware:
                                 f"(session {session_key}). Logging out."
                             )
                             logout(request)
-                            # Redirect to login without trying to add message
-                            # (MessageMiddleware may not have processed yet)
                             return redirect('login')
                 except Exception as e:
                     logger.error(f"Error in SessionValidationMiddleware: {e}", exc_info=True)
-                    # Continue anyway to avoid breaking the app
-        
         return self.get_response(request)
