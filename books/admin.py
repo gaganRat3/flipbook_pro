@@ -3,10 +3,11 @@ from .models import UserLoginSession
 
 @admin.register(UserLoginSession)
 class UserLoginSessionAdmin(admin.ModelAdmin):
-        def get_queryset(self, request):
-            qs = super().get_queryset(request)
-            # Exclude admin users from session admin
-            return qs.exclude(user__is_staff=True).exclude(user__is_superuser=True)
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        # Exclude admin users from session admin
+        return qs.exclude(user__is_staff=True).exclude(user__is_superuser=True)
+
     list_display = ('user', 'session_key', 'ip_address', 'user_agent', 'login_at', 'last_activity')
     actions = ['force_logout']
 
