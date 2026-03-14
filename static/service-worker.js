@@ -1,3 +1,6 @@
+const STATIC_CACHE = "static-v2 ";
+const DYNAMIC_CACHE = "dynamic-v2";
+const IMAGE_CACHE = "image-v2";
 // service-worker.js for Django static
 self.addEventListener('install', event => {
   self.skipWaiting();
@@ -35,7 +38,12 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Skip API calls and external URLs
-  if (request.url.includes('/api/') || request.url.includes('/admin/')) {
+  if (
+  request.url.includes('/api/') ||
+  request.url.includes('/admin/') ||
+  request.url.includes('/register/') ||
+  request.url.includes('/login/')
+) {
     event.respondWith(
       fetch(request)
         .then((response) => {
@@ -85,7 +93,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Network first strategy for HTML pages
-  if (request.destination === 'document' || request.destination === '') {
+  if (request.destination === 'document'){
     event.respondWith(
       fetch(request)
         .then((response) => {
