@@ -28,11 +28,23 @@ def cleanup_expired_sessions():
     from django.contrib.sessions.models import Session
     from django.utils import timezone
     
-    # Get all active session keys in Django
-    valid_sessions = Session.objects.values_list('session_key', flat=True)
-    
-    # Delete any UserLoginSession that references an expired session
-    UserLoginSession.objects.exclude(session_key__in=valid_sessions).delete()
+    try:
+        # Get all active session keys in Django
+        valid_sessions = set(Session.objects.values_list('session_key', flat=True))
+        
+        # Delete any UserLoginSession that references an expired session
+        orphaned = UserLoginSession.objects.exclude(session_key__in=valid_sessions)
+        deleted_count = orphaned.count()
+        orphaned.delete()
+        
+        # Also clean up expired Django sessions
+        expired = Session.objects.filter(expire_date__lt=timezone.now())
+        expired.delete()
+        
+        return deleted_count
+    except Exception as e:
+        print(f"Error during session cleanup: {e}")
+        return 0
 
 
 @login_required
@@ -137,12 +149,24 @@ def login_view(request):
             ip_address = get_client_ip(request)
             user_agent = request.META.get('HTTP_USER_AGENT', '')
             # Create a new login session record
-            UserLoginSession.objects.create(
-                user=user,
-                session_key=request.session.session_key,
-                ip_address=ip_address,
-                user_agent=user_agent
-            )
+            try:
+                # Ensure the session key is created
+                if not request.session.session_key:
+                    request.session.create()
+                
+                # Try to create the session record
+                UserLoginSession.objects.create(
+                    user=user,
+                    session_key=request.session.session_key,
+                    ip_address=ip_address,
+                    user_agent=user_agent
+                )
+            except Exception as e:
+                # Log error but allow login to proceed
+                print(f"Error creating UserLoginSession: {e}")
+                import traceback
+                traceback.print_exc()
+            
             messages.success(request, f"Welcome back, {user.username}!")
             return redirect('home')
         else:
@@ -160,10 +184,13 @@ def logout_view(request):
     """User logout view"""
     # Remove the login session record before logging out
     if request.user.is_authenticated:
-        UserLoginSession.objects.filter(
-            user=request.user,
-            session_key=request.session.session_key
-        ).delete()
+        try:
+            UserLoginSession.objects.filter(
+                user=request.user,
+                session_key=request.session.session_key
+            ).delete()
+        except Exception as e:
+            print(f"Error removing UserLoginSession during logout: {e}")
     
     logout(request)
     messages.info(request, "You have successfully logged out.")
