@@ -46,22 +46,79 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch event - serve cached files
+// Fetch event - do not cache auth/admin routes; keep logout/login always network-backed.
 self.addEventListener('fetch', (event) => {
-  // Defensive fix for only-if-cached error
-  const fetchOptions = {};
-  if (event.request.cache === 'only-if-cached') {
-    fetchOptions.cache = 'only-if-cached';
-    fetchOptions.mode = 'same-origin';
+  const request = event.request;
+  const url = new URL(request.url);
+
+  // Never intercept non-GET requests.
+  if (request.method !== 'GET') {
+    return;
   }
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request, fetchOptions).then((fetchResponse) => {
-        return caches.open(DYNAMIC_CACHE).then((cache) => {
-          cache.put(event.request, fetchResponse.clone());
-          return fetchResponse;
+
+  // Ignore cross-origin requests.
+  if (url.origin !== self.location.origin) {
+    return;
+  }
+
+  // Auth/admin/session-sensitive routes must always hit network.
+  const bypassPrefixes = [
+    '/login/',
+    '/logout/',
+    '/register/',
+    '/admin/',
+    '/active-sessions/',
+    '/unlock-request/',
+    '/debug/',
+  ];
+  if (bypassPrefixes.some((prefix) => url.pathname.startsWith(prefix))) {
+    event.respondWith(fetch(request));
+    return;
+  }
+
+  // Network-first for HTML documents.
+  if (request.mode === 'navigate' || request.destination === 'document') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(DYNAMIC_CACHE).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request).then((cached) => cached || caches.match('/offline/')))
+    );
+    return;
+  }
+
+  // Cache-first for static assets only.
+  if (url.pathname.startsWith('/static/') || url.pathname.startsWith('/media/')) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        if (cached) return cached;
+        return fetch(request).then((response) => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(STATIC_CACHE).then((cache) => cache.put(request, clone));
+          }
+          return response;
         });
-      });
-    })
+      })
+    );
+    return;
+  }
+
+  // Default network-first fallback.
+  event.respondWith(
+    fetch(request)
+      .then((response) => {
+        if (response && response.status === 200) {
+          const clone = response.clone();
+          caches.open(DYNAMIC_CACHE).then((cache) => cache.put(request, clone));
+        }
+        return response;
+      })
+      .catch(() => caches.match(request))
   );
 });

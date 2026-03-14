@@ -181,17 +181,34 @@ def login_view(request):
 
 
 def logout_view(request):
-    """User logout view"""
-    # Remove the login session record before logging out
+    """User logout view - Removes session from database."""
+    if request.method != 'POST':
+        return redirect('home')
+
     if request.user.is_authenticated:
+        user = request.user
+        session_key = request.session.session_key
+
         try:
-            UserLoginSession.objects.filter(
-                user=request.user,
-                session_key=request.session.session_key
-            ).delete()
+            # Prefer exact match for current browser session.
+            if session_key:
+                deleted_count, _ = UserLoginSession.objects.filter(
+                    user=user,
+                    session_key=session_key
+                ).delete()
+
+                if deleted_count == 0:
+                    # Fallback for any session-key mismatch edge case.
+                    deleted_count, _ = UserLoginSession.objects.filter(user=user).delete()
+            else:
+                deleted_count, _ = UserLoginSession.objects.filter(user=user).delete()
+
         except Exception as e:
             print(f"Error removing UserLoginSession during logout: {e}")
-    
+            import traceback
+            traceback.print_exc()
+
+    # Django logout
     logout(request)
     messages.info(request, "You have successfully logged out.")
     return redirect('login')

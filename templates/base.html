@@ -121,7 +121,10 @@
             <div class="navbar-menu">
                 {% if user.is_authenticated %}
                     <span style="color: #666; font-size: 14px;"><i class="fas fa-user"></i> {{ user.username }}</span>
-                    <a href="{% url 'logout' %}" class="btn btn-primary"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    <form method="post" action="{% url 'logout' %}" style="display:inline; margin:0;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                    </form>
                 {% else %}
                     {% comment %} <a href="{% url 'login' %}" class="btn btn-primary"></i> Login</a> {% endcomment %}
                 {% endif %}

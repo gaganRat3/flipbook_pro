@@ -41,6 +41,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'books.middleware.AdminForceStaffLogoutMiddleware',
+    'books.middleware.SessionValidationMiddleware',  # ← Auto-logout when session deleted
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
