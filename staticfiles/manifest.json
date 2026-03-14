@@ -2,7 +2,7 @@
   "name": "bhudevstore",
   "short_name": "bhudevstore",
   "description": "Flipbook application for book viewing and management",
-  "start_url": "/",
+  "start_url": "/register/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
