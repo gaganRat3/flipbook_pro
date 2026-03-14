@@ -101,12 +101,15 @@ def login_view(request):
     # Ensure session key exists before checking for existing sessions
     if not request.session.session_key:
         request.session.create()
-    
+
+    # Cleanup expired sessions before checking for active sessions
+    cleanup_expired_sessions()
+
     if request.user.is_authenticated:
         return redirect('home')
 
     session_limit_error = False
-    
+
     if request.method == 'POST':
         form = UsernameEmailAuthenticationForm(request.POST)
         if form.is_valid():
