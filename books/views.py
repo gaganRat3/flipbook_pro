@@ -51,7 +51,11 @@ def cleanup_expired_sessions():
 def active_sessions_view(request):
     """Show user their active login sessions and allow logout from other devices"""
     user = request.user
-    sessions = UserLoginSession.objects.filter(user=user).order_by('-login_at')
+    # Exclude admin users from session management
+    if user.is_staff or user.is_superuser:
+        sessions = []
+    else:
+        sessions = UserLoginSession.objects.filter(user=user).order_by('-login_at')
     
     # Cleanup expired sessions
     cleanup_expired_sessions()
@@ -70,16 +74,17 @@ def active_sessions_view(request):
 def logout_other_session(request, session_id):
     """Allow user to logout from another session/device"""
     if request.method == 'POST':
+        # Exclude admin users from session management
+        if request.user.is_staff or request.user.is_superuser:
+            messages.error(request, "Admin users cannot manage sessions here.")
+            return redirect('active_sessions')
         session = get_object_or_404(UserLoginSession, id=session_id, user=request.user)
-        
         # Don't allow logout from current session
         if session.session_key == request.session.session_key:
             messages.error(request, "You cannot logout from your current session here. Use the logout button instead.")
             return redirect('active_sessions')
-        
         session.delete()
         messages.success(request, "That session has been logged out successfully.")
-    
     return redirect('active_sessions')
 
 
