@@ -1,4 +1,4 @@
-const STATIC_CACHE = "static-v2 ";
+const STATIC_CACHE = "static-v3";
 const DYNAMIC_CACHE = "dynamic-v2";
 const IMAGE_CACHE = "image-v2";
 // service-worker.js for Django static
@@ -44,23 +44,7 @@ self.addEventListener('fetch', (event) => {
   request.url.includes('/register/') ||
   request.url.includes('/login/')
 ) {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          if (response.status === 200) {
-            const cache =
-              request.headers.get('accept').includes('application/json')
-                ? DYNAMIC_CACHE
-                : STATIC_CACHE;
-            const responseClone = response.clone();
-            caches.open(cache).then((c) => c.put(request, responseClone));
-          }
-          return response;
-        })
-        .catch(() => {
-          return caches.match(request);
-        })
-    );
+    event.respondWith(fetch(request));
     return;
   }
 
@@ -76,11 +60,18 @@ self.addEventListener('fetch', (event) => {
           return response;
         }
         return fetch(request)
-          .then((fetched) => {
+         .then((fetched) => {
+
+            if (!fetched || fetched.status !== 200 || fetched.type !== "basic") {
+              return fetched;
+            }
+
             const responseClone = fetched.clone();
-            caches.open(IMAGE_CACHE).then((cache) => {
+
+            caches.open(STATIC_CACHE).then((cache) => {
               cache.put(request, responseClone);
             });
+
             return fetched;
           })
           .catch(() => {
@@ -93,31 +84,10 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Network first strategy for HTML pages
-  if (request.destination === 'document'){
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          if (response.status === 200) {
-            const responseClone = response.clone();
-            caches.open(DYNAMIC_CACHE).then((cache) => {
-              cache.put(request, responseClone);
-            });
-          }
-          return response;
-        })
-        .catch(() => {
-          return caches.match(request).then((cached) => {
-            if (cached) {
-              return cached;
-            }
-            // Return offline page if available
-            return caches.match('/offline.html');
-          });
-        })
-    );
-    return;
-  }
-
+  if (request.destination === 'document') {
+  event.respondWith(fetch(request));
+  return;
+}
   // Cache first strategy for static assets (CSS, JS, fonts)
   event.respondWith(
     caches.match(request).then((response) => {
