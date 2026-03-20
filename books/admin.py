@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models import Q
 from .models import UserLoginSession
 
 @admin.register(UserLoginSession)
@@ -321,7 +322,14 @@ admin.site.register(FlipBookAccess, FlipBookAccessAdmin)
 from django.core.paginator import Paginator
 @staff_member_required
 def user_flipbook_access_view(request):
-    users_qs = User.objects.filter(is_staff=False, is_superuser=False).order_by('username')
+
+    search_query = request.GET.get('search', '').strip()
+    users_qs = User.objects.filter(is_staff=False, is_superuser=False)
+    if search_query:
+        users_qs = users_qs.filter(
+            Q(username__icontains=search_query) | Q(email__icontains=search_query)
+        )
+    users_qs = users_qs.order_by('username')
     paginator = Paginator(users_qs, 10)  # 10 users per page
     page_number = request.GET.get('page')
     users = paginator.get_page(page_number)
@@ -371,6 +379,7 @@ def user_flipbook_access_view(request):
         'user_flipbook_ids': user_flipbook_ids,
         'paginator': paginator,
         'page_obj': users,
+        'search_query': search_query,
     }
     return render(request, 'admin/user_flipbook_access.html', context)
 
