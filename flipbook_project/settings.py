@@ -14,10 +14,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Security
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-this-in-production')
 DEBUG = config('DEBUG', default=True, cast=bool)
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '58039ee8d1df.ngrok-free.app', '4482-103-241-224-69.ngrok-free.app', 'keyla-mirier-pebbly.ngrok-free.dev', 'bhudevstore.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '58039ee8d1df.ngrok-free.app', '29e8-103-228-147-158.ngrok-free.app', 'keyla-mirier-pebbly.ngrok-free.dev', 'bhudevstore.com']
 
 # CSRF trusted origins for ngrok
-CSRF_TRUSTED_ORIGINS = ['https://58039ee8d1df.ngrok-free.app', 'https://4482-103-241-224-69.ngrok-free.app', 'https://keyla-mirier-pebbly.ngrok-free.dev','https://bhudevstore.com']
+CSRF_TRUSTED_ORIGINS = ['https://29e8-103-228-147-158.ngrok-free.app', 'https://4482-103-241-224-69.ngrok-free.app', 'https://keyla-mirier-pebbly.ngrok-free.dev','https://bhudevstore.com']
 
 # CSRF cookie settings for production
 CSRF_COOKIE_SECURE = True  # Set to True if using HTTPS in production
@@ -77,7 +77,6 @@ DATABASES = {
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
     {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},

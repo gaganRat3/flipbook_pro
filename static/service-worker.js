@@ -1,14 +1,25 @@
-const STATIC_CACHE = "static-v3";
-const DYNAMIC_CACHE = "dynamic-v2";
-const IMAGE_CACHE = "image-v2";
-// service-worker.js for Django static
+const STATIC_CACHE = "static-v4";
+const DYNAMIC_CACHE = "dynamic-v3";
+const IMAGE_CACHE = "image-v3";
+const OFFLINE_URL = "/offline.html";
+
+// List of core assets to cache for offline
+const CORE_ASSETS = [
+  '/',
+  '/offline.html',
+  '/static/css/filters.css',
+  '/static/manifest.json',
+  // Add more static assets as needed
+];
+
 self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(STATIC_CACHE).then(cache => cache.addAll(CORE_ASSETS))
+  );
   self.skipWaiting();
 });
 
-// Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker: Activating...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
@@ -18,37 +29,33 @@ self.addEventListener('activate', (event) => {
             cacheName !== DYNAMIC_CACHE &&
             cacheName !== IMAGE_CACHE
           ) {
-            console.log('Service Worker: Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
     })
   );
-  self.clients.claim(); // Take control of all pages
+  self.clients.claim();
 });
 
-// Fetch event - intercept network requests
 self.addEventListener('fetch', (event) => {
   const { request } = event;
 
-  // Skip non-GET requests
-  if (request.method !== 'GET') {
-    return;
-  }
+  // Only handle GET requests
+  if (request.method !== 'GET') return;
 
-  // Skip API calls and external URLs
+  // Skip API and auth/admin routes
   if (
-  request.url.includes('/api/') ||
-  request.url.includes('/admin/') ||
-  request.url.includes('/register/') ||
-  request.url.includes('/login/')
-) {
+    request.url.includes('/api/') ||
+    request.url.includes('/admin/') ||
+    request.url.includes('/register/') ||
+    request.url.includes('/login/')
+  ) {
     event.respondWith(fetch(request));
     return;
   }
 
-  // Cache images separately
+  // Images: cache first, then network, fallback to placeholder
   if (
     request.destination === 'image' ||
     request.url.includes('/media/') ||
@@ -56,55 +63,97 @@ self.addEventListener('fetch', (event) => {
   ) {
     event.respondWith(
       caches.match(request).then((response) => {
-        if (response) {
-          return response;
-        }
+        if (response) return response;
         return fetch(request)
-         .then((fetched) => {
-
+          .then((fetched) => {
             if (!fetched || fetched.status !== 200 || fetched.type !== "basic") {
               return fetched;
             }
-
             const responseClone = fetched.clone();
-
-            caches.open(STATIC_CACHE).then((cache) => {
+            caches.open(IMAGE_CACHE).then((cache) => {
               cache.put(request, responseClone);
             });
-
             return fetched;
           })
-          .catch(() => {
-            // Return a placeholder offline image if available
-            return caches.match('/static/images/offline-placeholder.png');
-          });
+          .catch(() => caches.match('/static/images/offline-placeholder.png'));
       })
     );
     return;
   }
 
-  // Network first strategy for HTML pages
-  if (request.destination === 'document') {
-  event.respondWith(fetch(request));
-  return;
-}
-  // Cache first strategy for static assets (CSS, JS, fonts)
-  event.respondWith(
-    caches.match(request).then((response) => {
-      if (response) {
-        return response;
-      }
-      return fetch(request)
-        .then((fetched) => {
+  // HTML pages: network first, fallback to cache/offline
+  if (request.mode === 'navigate' || request.destination === 'document') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          // Cache the page
+          const responseClone = response.clone();
+          caches.open(DYNAMIC_CACHE).then((cache) => {
+            cache.put(request, responseClone);
+          });
+          return response;
+        })
+        .catch(() => caches.match(request).then((cached) => cached || caches.match(OFFLINE_URL)))
+    );
+    return;
+  }
+
+  // Static assets (CSS, JS, fonts): cache first, then network
+  if (
+    request.destination === 'style' ||
+    request.destination === 'script' ||
+    request.destination === 'font'
+  ) {
+    event.respondWith(
+      caches.match(request).then((response) => {
+        if (response) return response;
+        return fetch(request).then((fetched) => {
           const responseClone = fetched.clone();
           caches.open(STATIC_CACHE).then((cache) => {
             cache.put(request, responseClone);
           });
           return fetched;
-        })
-        .catch(() => {
-          console.log('Service Worker: Offline - unable to fetch:', request.url);
         });
+      })
+    );
+    return;
+  }
+
+  // Fallback: try network, then cache
+  event.respondWith(
+    fetch(request).catch(() => caches.match(request))
+  );
+});
+
+// Notification support
+self.addEventListener('push', function(event) {
+  let data = {};
+  if (event.data) {
+    data = event.data.json();
+  }
+  const title = data.title || 'Notification';
+  const options = {
+    body: data.body || '',
+    icon: data.icon || '/static/images/icon-192.png',
+    badge: data.badge || '/static/images/icon-192.png',
+    data: data.url || '/',
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', function(event) {
+  event.notification.close();
+  const url = event.notification.data || '/';
+  event.waitUntil(
+    clients.matchAll({ type: 'window' }).then(windowClients => {
+      for (let client of windowClients) {
+        if (client.url === url && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow(url);
+      }
     })
   );
 });

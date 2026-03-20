@@ -220,9 +220,11 @@ def logout_view(request):
 
 
 
+from .models import Notification
+
 @login_required
 def home_view(request):
-    """Home page - list only flipbooks user can access, with event, gender, and category filtering"""
+    """Home page - list only flipbooks user can access, with event, gender, and category filtering, and show notifications"""
     # Ensure session key exists
     if not request.session.session_key:
         request.session.create()
@@ -308,6 +310,10 @@ def home_view(request):
         {'id': 'divorce-widow', 'name': 'Divorce & Widow'},
     ]
 
+    # Fetch notifications for the user (limit 10)
+    notifications = Notification.objects.filter(user=request.user).order_by('-created_at')[:10]
+    # Fetch the latest unread notification (if any)
+    latest_unread_notification = Notification.objects.filter(user=request.user, is_read=False).order_by('-created_at').first()
     context = {
         'books': books,
         'events': events,
@@ -321,6 +327,8 @@ def home_view(request):
         'girl_categories': girl_categories,
         'boy_categories': boy_categories,
         'categories': categories,
+        'notifications': notifications,
+        'latest_unread_notification': latest_unread_notification,
     }
     return render(request, 'books/home.html', context)
 

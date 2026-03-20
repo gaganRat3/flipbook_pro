@@ -1217,12 +1217,81 @@
   
 </style>
 
+
 <div class="library-container">
+  <!-- Notification Toast Popup -->
+  {% if latest_unread_notification %}
+  <div id="notification-toast" style="position: fixed; top: 30px; right: 30px; z-index: 2000; background: #fff8f1; color: #fa8112; border: 2px solid #fa8112; border-radius: 12px; box-shadow: 0 8px 32px rgba(46,134,171,0.18); padding: 22px 32px 18px 24px; min-width: 320px; max-width: 400px; display: flex; align-items: flex-start; gap: 16px; animation: fadeInDown 0.7s;">
+    <i class="fas fa-bell" style="font-size: 28px; margin-top: 2px;"></i>
+    <div style="flex: 1;">
+      <div style="font-size: 16px; font-weight: 700; margin-bottom: 4px;">Notification</div>
+      <div style="font-size: 15px;">{{ latest_unread_notification.message }}</div>
+      <div style="font-size: 12px; color: #888; margin-top: 6px;">{{ latest_unread_notification.created_at|date:'M d, H:i' }}</div>
+    </div>
+    <button onclick="closeNotificationToast()" style="background: none; border: none; color: #fa8112; font-size: 20px; cursor: pointer; margin-left: 8px;">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+  <style>
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+  <script>
+    function closeNotificationToast() {
+      var toast = document.getElementById('notification-toast');
+      if (toast) toast.style.display = 'none';
+    }
+    // Auto-hide after 7 seconds
+    setTimeout(closeNotificationToast, 7000);
+  </script>
+  {% endif %}
   <div class="container">
+    <!-- Notification Dropdown -->
+    <div style="position: absolute; top: 24px; right: 32px; z-index: 100;">
+      <div class="dropdown" style="position: relative;">
+        <button id="notifDropdownBtn" onclick="toggleNotifDropdown()" style="background: none; border: none; cursor: pointer; position: relative;">
+          <i class="fas fa-bell" style="font-size: 28px; color: #fa8112;"></i>
+          {% if notifications and notifications|length > 0 %}
+            <span style="position: absolute; top: -6px; right: -6px; background: #ff6b6b; color: white; border-radius: 50%; padding: 2px 7px; font-size: 12px; font-weight: bold;">{{ notifications|length }}</span>
+          {% endif %}
+        </button>
+        <div id="notifDropdown" class="dropdown-content" style="display: none; position: absolute; right: 0; top: 38px; background: #fff; min-width: 320px; max-width: 400px; box-shadow: 0 8px 32px rgba(46,134,171,0.18); border-radius: 12px; overflow: hidden;">
+          <div style="padding: 16px 18px; border-bottom: 1px solid #f0f0f0; font-weight: 700; color: #fa8112; font-size: 16px;">Notifications</div>
+          {% if notifications and notifications|length > 0 %}
+            <ul style="list-style: none; margin: 0; padding: 0; max-height: 350px; overflow-y: auto;">
+              {% for notif in notifications %}
+                <li style="padding: 14px 18px; border-bottom: 1px solid #f6f6f6; background: {% if not notif.is_read %}#fff8f1{% else %}#fff{% endif %};">
+                  <i class="fas fa-info-circle" style="color: #2E86AB; margin-right: 8px;"></i>
+                  <span style="font-size: 15px;">{{ notif.message }}</span>
+                  <span style="float: right; color: #aaa; font-size: 12px;">{{ notif.created_at|date:'M d, H:i' }}</span>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <div style="padding: 24px 18px; color: #888; text-align: center;">No notifications yet.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
     <div class="library-header">
       <h1><i class="fas fa-book-open"></i> FlipBook Library</h1>
       <p>Explore our collection of interactive flipbooks</p>
     </div>
+<script>
+  function toggleNotifDropdown() {
+    var dropdown = document.getElementById('notifDropdown');
+    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+  }
+  document.addEventListener('click', function(event) {
+    var btn = document.getElementById('notifDropdownBtn');
+    var dropdown = document.getElementById('notifDropdown');
+    if (!btn.contains(event.target) && !dropdown.contains(event.target)) {
+      dropdown.style.display = 'none';
+    }
+  });
+</script>
 
     <!-- Filter Dashboard with Buttons -->
     <div
@@ -1939,14 +2008,14 @@
     calculateTotal();
   }
 
+
+  let isSubmitting = false; // Flag to prevent double submission
   function closeUnlockModal() {
     document.getElementById("unlockModal").classList.remove("active");
     document.getElementById("unlockModalOverlay").classList.remove("active");
     document.body.style.overflow = "auto";
     isSubmitting = false; // Reset submission flag when modal is closed
   }
-
-  let isSubmitting = false; // Flag to prevent double submission
 
   document.addEventListener("keydown", function (event) {
     if (event.key === "Escape") {

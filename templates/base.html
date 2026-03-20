@@ -21,9 +21,25 @@
         <script>
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
-                        navigator.serviceWorker.register('/service-worker.js')
+                    navigator.serviceWorker.register('/service-worker.js')
                         .then(function(registration) {
                             console.log('ServiceWorker registration successful:', registration.scope);
+                            // Request notification permission
+                            if ('Notification' in window && Notification.permission !== 'granted') {
+                                Notification.requestPermission().then(function(permission) {
+                                    if (permission === 'granted') {
+                                        console.log('Notification permission granted.');
+                                    }
+                                });
+                            }
+                            // Optionally: subscribe to push notifications (requires backend setup)
+                            // registration.pushManager.subscribe({
+                            //     userVisibleOnly: true,
+                            //     applicationServerKey: '<Your-VAPID-Public-Key-Here>'
+                            // }).then(function(subscription) {
+                            //     // Send subscription to backend
+                            //     console.log('Push subscription:', subscription);
+                            // });
                         })
                         .catch(function(error) {
                             console.error('ServiceWorker registration failed:', error);
