@@ -1,6 +1,3 @@
-# Session security settings
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-SESSION_COOKIE_SECURE = True
 """
 Django settings for flipbook_project.
 """
@@ -22,6 +19,14 @@ CSRF_TRUSTED_ORIGINS = ['https://29e8-103-228-147-158.ngrok-free.app', 'https://
 # CSRF cookie settings for production
 CSRF_COOKIE_SECURE = True  # Set to True if using HTTPS in production
 CSRF_COOKIE_SAMESITE = 'Lax'
+
+# Session configuration for persistent login
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Keep session alive after browser close
+SESSION_COOKIE_AGE = 30 * 24 * 60 * 60  # 30 days session timeout
+SESSION_COOKIE_SECURE = True  # Only send over HTTPS
+SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access
+SESSION_COOKIE_SAMESITE = 'Lax'  # CSRF protection
+SESSION_SAVE_EVERY_REQUEST = False  # Don't update session timestamp on every request (better performance)
 
 # Application definition
 INSTALLED_APPS = [
