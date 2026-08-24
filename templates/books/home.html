@@ -925,16 +925,18 @@
 
   .book-demographics {
     position: relative;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 4px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px;
     margin: 2px 0 14px;
-    padding: 10px 5px 9px;
+    padding: 8px 10px;
     background: linear-gradient(135deg, #fffaf5 0%, #fff2f8 100%);
     border: 1px solid #f1c1dc;
     border-radius: 8px;
     color: #344054;
-    text-align: center;
     box-shadow: 0 4px 12px rgba(196, 76, 135, 0.1), inset 0 1px 0 #ffffff;
   }
 
@@ -952,10 +954,11 @@
   }
 
   .book-demographics span {
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    line-height: 1.15;
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
     transition: transform 0.2s ease;
   }
 
@@ -963,35 +966,24 @@
     transform: translateY(-2px);
   }
 
-  .book-demographics span + span {
-    border-left: 1px solid #edcfe0;
-  }
-
   .book-demographics b {
     font-size: 11px;
     font-weight: 700;
-    white-space: nowrap;
   }
 
   .book-demographics small {
-    min-height: 13px;
     color: #8b6680;
     font-size: 9px;
   }
 
   .book-demographics strong {
-    margin-top: 3px;
     color: #d85b93;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 800;
   }
 
   .book-demographics span:nth-child(2) strong {
     color: #8b5fc7;
-  }
-
-  .book-demographics span:nth-child(3) strong {
-    color: #e47b35;
   }
 
   .book-meta {
@@ -1583,11 +1575,10 @@
               {% if book.description %}
               <p>{{ book.description|truncatewords:15 }}</p>
               {% endif %}
-              {% if book.boys_count is not None or book.girls_count is not None or book.total_count is not None %}
+              {% if book.boys_count is not None or book.girls_count is not None %}
               <div class="book-demographics">
-                {% if book.boys_count is not None %}<span><b>યુવકો</b><small>(Boys)</small><strong>{{ book.boys_count }}</strong></span>{% endif %}
-                {% if book.girls_count is not None %}<span><b>યુવતીઓ</b><small>(Girls)</small><strong>{{ book.girls_count }}</strong></span>{% endif %}
-                {% if book.total_count is not None %}<span><b>Total</b><small>&nbsp;</small><strong>{{ book.total_count }}</strong></span>{% endif %}
+                {% if book.boys_count is not None %}<span><b>total યુવકો</b><small>(Boys)</small><strong>{{ book.boys_count }}</strong></span>{% endif %}
+                {% if book.girls_count is not None %}<span><b>total યુવતીઓ</b><small>(Girls)</small><strong>{{ book.girls_count }}</strong></span>{% endif %}
               </div>
               {% endif %}
               <div class="book-meta">
@@ -1626,11 +1617,10 @@
               {% if book.description %}
               <p>{{ book.description|truncatewords:15 }}</p>
               {% endif %}
-              {% if book.boys_count is not None or book.girls_count is not None or book.total_count is not None %}
+              {% if book.boys_count is not None or book.girls_count is not None %}
               <div class="book-demographics">
-                {% if book.boys_count is not None %}<span><b>યુવકો</b><small>(Boys)</small><strong>{{ book.boys_count }}</strong></span>{% endif %}
-                {% if book.girls_count is not None %}<span><b>યુવતીઓ</b><small>(Girls)</small><strong>{{ book.girls_count }}</strong></span>{% endif %}
-                {% if book.total_count is not None %}<span><b>Total</b><small>&nbsp;</small><strong>{{ book.total_count }}</strong></span>{% endif %}
+                {% if book.boys_count is not None %}<span><b>total યુવકો</b><small>(Boys)</small><strong>{{ book.boys_count }}</strong></span>{% endif %}
+                {% if book.girls_count is not None %}<span><b>total યુવતીઓ</b><small>(Girls)</small><strong>{{ book.girls_count }}</strong></span>{% endif %}
               </div>
               {% endif %}
               <div class="book-meta">

@@ -183,7 +183,7 @@ class FlipBookAdmin(admin.ModelAdmin):
             'fields': ('title', 'description', 'event', 'pdf_file', 'thumbnail', 'thumbnail_preview')
         }),
         ('Demographics', {
-            'fields': ('boys_count', 'girls_count', 'total_count')
+            'fields': ('boys_count', 'girls_count')
         }),
         ('Settings', {
             'fields': ('is_published', 'created_by')

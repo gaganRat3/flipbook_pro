@@ -53,11 +53,6 @@ class FlipBook(models.Model):
         blank=True,
         verbose_name='યુવતીઓ (Girls)',
     )
-    total_count = models.PositiveIntegerField(
-        null=True,
-        blank=True,
-        verbose_name='Total',
-    )
     event = models.ForeignKey(Event, on_delete=models.SET_NULL, null=True, blank=True, related_name='flipbooks')
     pdf_file = models.FileField(upload_to='pdfs/')
     thumbnail = models.ImageField(upload_to='thumbnails/', blank=True, null=True)
