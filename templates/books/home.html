@@ -4,6 +4,7 @@
 
 {% block content %}
 <style>
+  /* stylelint-disable */
   .filter-buttons-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -898,8 +899,11 @@
     margin: 0 0 10px 0;
     line-height: 1.35;
     display: -webkit-box;
+    display: box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
+    box-orient: vertical;
     overflow: hidden;
     letter-spacing: 0.2px;
   }
@@ -911,9 +915,83 @@
     line-height: 1.45;
     flex-grow: 1;
     display: -webkit-box;
+    display: box;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
+    box-orient: vertical;
     overflow: hidden;
+  }
+
+  .book-demographics {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+    margin: 2px 0 14px;
+    padding: 10px 5px 9px;
+    background: linear-gradient(135deg, #fffaf5 0%, #fff2f8 100%);
+    border: 1px solid #f1c1dc;
+    border-radius: 8px;
+    color: #344054;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(196, 76, 135, 0.1), inset 0 1px 0 #ffffff;
+  }
+
+  .book-demographics::before {
+    content: 'BOOK DETAILS';
+    position: absolute;
+    top: -7px;
+    left: 10px;
+    padding: 0 5px;
+    background: #fff8f5;
+    color: #b14d7d;
+    font-size: 7px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+  }
+
+  .book-demographics span {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+    transition: transform 0.2s ease;
+  }
+
+  .book-demographics span:hover {
+    transform: translateY(-2px);
+  }
+
+  .book-demographics span + span {
+    border-left: 1px solid #edcfe0;
+  }
+
+  .book-demographics b {
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .book-demographics small {
+    min-height: 13px;
+    color: #8b6680;
+    font-size: 9px;
+  }
+
+  .book-demographics strong {
+    margin-top: 3px;
+    color: #d85b93;
+    font-size: 16px;
+    font-weight: 800;
+  }
+
+  .book-demographics span:nth-child(2) strong {
+    color: #8b5fc7;
+  }
+
+  .book-demographics span:nth-child(3) strong {
+    color: #e47b35;
   }
 
   .book-meta {
@@ -1215,6 +1293,7 @@
       font-size: 14px;
     }
   
+  /* stylelint-enable */
 </style>
 
 
@@ -1262,13 +1341,18 @@
           {% if notifications and notifications|length > 0 %}
             <ul style="list-style: none; margin: 0; padding: 0; max-height: 350px; overflow-y: auto;">
               {% for notif in notifications %}
-                <li style="padding: 14px 18px; border-bottom: 1px solid #f6f6f6; background: {% if not notif.is_read %}#fff8f1{% else %}#fff{% endif %};">
+                <li style="padding: 14px 18px; border-bottom: 1px solid #f6f6f6; background: #fff;" class="{% if not notif.is_read %}notif-unread{% endif %}">
                   <i class="fas fa-info-circle" style="color: #2E86AB; margin-right: 8px;"></i>
                   <span style="font-size: 15px;">{{ notif.message }}</span>
                   <span style="float: right; color: #aaa; font-size: 12px;">{{ notif.created_at|date:'M d, H:i' }}</span>
                 </li>
               {% endfor %}
             </ul>
+            <style>
+              .notif-unread {
+                background: #fff8f1 !important;
+              }
+            </style>
           {% else %}
             <div style="padding: 24px 18px; color: #888; text-align: center;">No notifications yet.</div>
           {% endif %}
@@ -1386,7 +1470,8 @@
               type="button"
               class="category-collapse-toggle {% if selected_event == event.id %}active{% endif %}"
               onclick="toggleEventSubcategories(event, '{{ event.id }}')"
-              style="width: 100%; border-color: {{ event.color }}; color: {{ event.color }};"
+              data-event-color="{{ event.color }}"
+              style="width: 100%;"
             >
               <i class="{{ event.icon }}"></i> {{ event.name }}
             </button>
@@ -1448,6 +1533,7 @@
     {% for grouper in books_by_event %}
     <div
       class="event-section"
+      id="books-section-{{ forloop.counter }}"
       {%
       if
       grouper.grouper
@@ -1497,6 +1583,13 @@
               {% if book.description %}
               <p>{{ book.description|truncatewords:15 }}</p>
               {% endif %}
+              {% if book.boys_count is not None or book.girls_count is not None or book.total_count is not None %}
+              <div class="book-demographics">
+                {% if book.boys_count is not None %}<span><b>યુવકો</b><small>(Boys)</small><strong>{{ book.boys_count }}</strong></span>{% endif %}
+                {% if book.girls_count is not None %}<span><b>યુવતીઓ</b><small>(Girls)</small><strong>{{ book.girls_count }}</strong></span>{% endif %}
+                {% if book.total_count is not None %}<span><b>Total</b><small>&nbsp;</small><strong>{{ book.total_count }}</strong></span>{% endif %}
+              </div>
+              {% endif %}
               <div class="book-meta">
                 <span><i class="fas fa-file-pdf"></i> {{ book.total_pages }} pages</span>
               </div>
@@ -1532,6 +1625,13 @@
               <h3>{{ book.title }}</h3>
               {% if book.description %}
               <p>{{ book.description|truncatewords:15 }}</p>
+              {% endif %}
+              {% if book.boys_count is not None or book.girls_count is not None or book.total_count is not None %}
+              <div class="book-demographics">
+                {% if book.boys_count is not None %}<span><b>યુવકો</b><small>(Boys)</small><strong>{{ book.boys_count }}</strong></span>{% endif %}
+                {% if book.girls_count is not None %}<span><b>યુવતીઓ</b><small>(Girls)</small><strong>{{ book.girls_count }}</strong></span>{% endif %}
+                {% if book.total_count is not None %}<span><b>Total</b><small>&nbsp;</small><strong>{{ book.total_count }}</strong></span>{% endif %}
+              </div>
               {% endif %}
               <div class="book-meta">
                 <span><i class="fas fa-file-pdf"></i> {{ book.total_pages }} pages</span>
@@ -1647,7 +1747,7 @@
       <!-- Book Selection Section -->
       <div class="form-group">
         <label>How Many Books Do You Want? <span class="required">*</span></label>
-        <small class="form-hint">Select one or more books (₹300 per book)</small>
+        <small class="form-hint">Select one or more books (₹500 per book)</small>
         
         <!-- Girls Books Section -->
         <div class="books-selection-section">
@@ -1661,14 +1761,14 @@
                   id="book_{{ book.id }}" 
                   name="selected_books" 
                   value="{{ book.id }}" 
-                  data-price="300"
+                  data-price="500"
                   data-title="{{ book.title }}"
                   class="book-checkbox"
                   onchange="calculateTotal()"
                 >
                 <label for="book_{{ book.id }}" class="book-label">
                   <span class="book-title">{{ book.title }}</span>
-                  <span class="book-price">₹300</span>
+                  <span class="book-price">₹500</span>
                 </label>
               </div>
               {% endif %}
@@ -1688,14 +1788,14 @@
                   id="book_{{ book.id }}" 
                   name="selected_books" 
                   value="{{ book.id }}" 
-                  data-price="300"
+                  data-price="500"
                   data-title="{{ book.title }}"
                   class="book-checkbox"
                   onchange="calculateTotal()"
                 >
                 <label for="book_{{ book.id }}" class="book-label">
                   <span class="book-title">{{ book.title }}</span>
-                  <span class="book-price">₹300</span>
+                  <span class="book-price">₹500</span>
                 </label>
               </div>
               {% endif %}
@@ -1713,7 +1813,7 @@
           </div>
           <div class="summary-row">
             <span class="summary-label">Price per Book:</span>
-            <span class="summary-value">₹300</span>
+            <span class="summary-value">₹500</span>
           </div>
           <div class="summary-row summary-total">
             <span class="summary-label">Total Amount:</span>
@@ -1915,7 +2015,7 @@
   function calculateTotal() {
     const checkboxes = document.querySelectorAll('.book-checkbox:checked');
     const totalBooks = checkboxes.length;
-    const pricePerBook = 300;
+    const pricePerBook = 500;
     const totalAmount = totalBooks * pricePerBook;
 
     // Update counter
@@ -2108,7 +2208,7 @@
     selectedBooks.forEach(checkbox => {
       postData.append("selected_books", checkbox.value);
     });
-    postData.append("total_amount", selectedBooks.length * 300);
+    postData.append("total_amount", selectedBooks.length * 500);
     fetch("/unlock-request/", {
       method: "POST",
       headers: {
@@ -2208,6 +2308,18 @@
   document.addEventListener('DOMContentLoaded', function() {
     const selectedEventId = '{{ selected_event }}';
     const selectedCategoryId = '{{ selected_category }}';
+    const selectedMelaType = '{{ selected_mela_type }}';
+    const myBooksFilter = '{{ my_books_filter }}';
+    
+    // Apply dynamic event colors from data attributes
+    document.querySelectorAll('.category-collapse-toggle[data-event-color]').forEach(button => {
+      const color = button.getAttribute('data-event-color');
+      if (color) {
+        button.style.borderColor = color;
+        button.style.color = color;
+      }
+    });
+    
     if (selectedEventId) {
       const eventSubcatDiv = document.getElementById('event-subcat-' + selectedEventId);
       if (eventSubcatDiv) {
@@ -2227,6 +2339,22 @@
           button.classList.add('active');
         }
       }
+    }
+    
+    // Auto-scroll to filtered books when filters are applied
+    const hasFilters = selectedEventId || selectedCategoryId || selectedMelaType || myBooksFilter === 'true';
+    if (hasFilters) {
+      // Use setTimeout to ensure DOM is fully rendered
+      setTimeout(function() {
+        // Try to scroll to first event section
+        const firstEventSection = document.querySelector('.event-section');
+        if (firstEventSection) {
+          firstEventSection.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      }, 100);
     }
   });
 </script>

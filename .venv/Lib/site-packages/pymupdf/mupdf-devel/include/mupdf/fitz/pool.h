@@ -40,13 +40,22 @@ fz_pool *fz_new_pool(fz_context *ctx);
 
 /**
 	Allocate a block of size bytes from the pool.
+	Block will be inited to 0's.
 */
 void *fz_pool_alloc(fz_context *ctx, fz_pool *pool, size_t size);
+
+#define fz_pool_alloc_struct(CTX, POOL, TYPE) \
+	((TYPE*)Memento_label(fz_pool_alloc(CTX, POOL, sizeof(TYPE)), #TYPE))
 
 /**
 	strdup equivalent allocating from the pool.
 */
 char *fz_pool_strdup(fz_context *ctx, fz_pool *pool, const char *s);
+
+/**
+	strndup equivalent allocating from the pool.
+*/
+char *fz_pool_strndup(fz_context *ctx, fz_pool *pool, const char *s, size_t n);
 
 /**
 	The current size of the pool.

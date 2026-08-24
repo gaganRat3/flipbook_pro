@@ -453,7 +453,7 @@ def unlock_request_view(request):
                             UnlockRequestBook.objects.create(
                                 unlock_request=unlock_request,
                                 flipbook=selected_book,
-                                price=300
+                                price=500
                             )
                         except (FlipBook.DoesNotExist, ValueError):
                             print(f"Invalid book ID: {book_id}")

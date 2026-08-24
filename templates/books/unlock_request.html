@@ -786,7 +786,7 @@
       <!-- Book Selection Section -->
       <div class="form-section section-books-header">
         <h3 class="section-title"><i class="fas fa-book" style="color: #0E7490; margin-right: 8px;"></i>Select Books</h3>
-        <small class="form-hint" style="display: block; margin-bottom: 0;">Select one or more books (₹300 per book)</small>
+        <small class="form-hint" style="display: block; margin-bottom: 0;">Select one or more books (₹500 per book)</small>
       </div>
 
       <!-- Girls Books Section -->
@@ -799,7 +799,7 @@
               {% if book.id in accessible_ids %}
                 <div class="book-label" style="color: #aaa;">
                   <span class="book-title">{{ book.title }}</span>
-                  <span class="book-price">₹300</span>
+                  <span class="book-price">₹500</span>
                   <span style="color: #dc2626; font-weight: 600; font-size: 13px;">Already accessible</span>
                 </div>
               {% else %}
@@ -808,14 +808,14 @@
                   id="book_{{ book.id }}" 
                   name="selected_books" 
                   value="{{ book.id }}" 
-                  data-price="300"
+                  data-price="500"
                   data-title="{{ book.title }}"
                   class="book-checkbox"
                   onchange="calculateTotal()"
                 >
                 <label for="book_{{ book.id }}" class="book-label">
                   <span class="book-title">{{ book.title }}</span>
-                  <span class="book-price">₹300</span>
+                  <span class="book-price">₹500</span>
                 </label>
               {% endif %}
             </div>
@@ -834,7 +834,7 @@
               {% if book.id in accessible_ids %}
                 <div class="book-label" style="color: #aaa;">
                   <span class="book-title">{{ book.title }}</span>
-                  <span class="book-price">₹300</span>
+                  <span class="book-price">₹500</span>
                   <span style="color: #dc2626; font-weight: 600; font-size: 13px;">Already accessible</span>
                 </div>
               {% else %}
@@ -843,14 +843,14 @@
                   id="book_{{ book.id }}" 
                   name="selected_books" 
                   value="{{ book.id }}" 
-                  data-price="300"
+                  data-price="500"
                   data-title="{{ book.title }}"
                   class="book-checkbox"
                   onchange="calculateTotal()"
                 >
                 <label for="book_{{ book.id }}" class="book-label">
                   <span class="book-title">{{ book.title }}</span>
-                  <span class="book-price">₹300</span>
+                  <span class="book-price">₹500</span>
                 </label>
               {% endif %}
             </div>
@@ -867,7 +867,7 @@
         </div>
         <div class="summary-row">
           <span class="summary-label">Price per Book:</span>
-          <span class="summary-value">₹300</span>
+          <span class="summary-value">₹500</span>
         </div>
         <div class="summary-row summary-total">
           <span class="summary-label">Total Amount:</span>
@@ -1033,7 +1033,7 @@
   function calculateTotal() {
     const checkboxes = document.querySelectorAll('.book-checkbox:checked');
     const totalBooks = checkboxes.length;
-    const totalAmount = totalBooks * 300;
+    const totalAmount = totalBooks * 500;
 
     document.getElementById('totalBooks').textContent = totalBooks;
     document.getElementById('totalAmount').textContent = '₹' + totalAmount;
@@ -1146,7 +1146,7 @@
     selectedBooks.forEach(checkbox => {
       postData.append("selected_books", checkbox.value);
     });
-    postData.append("total_amount", selectedBooks.length * 300);
+    postData.append("total_amount", selectedBooks.length * 500);
 
     fetch("/unlock-request/", {
       method: "POST",

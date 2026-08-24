@@ -43,6 +43,21 @@ class FlipBook(models.Model):
     """Model for storing flipbooks"""
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
+    boys_count = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name='યુવકો (Boys)',
+    )
+    girls_count = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name='યુવતીઓ (Girls)',
+    )
+    total_count = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name='Total',
+    )
     event = models.ForeignKey(Event, on_delete=models.SET_NULL, null=True, blank=True, related_name='flipbooks')
     pdf_file = models.FileField(upload_to='pdfs/')
     thumbnail = models.ImageField(upload_to='thumbnails/', blank=True, null=True)
@@ -233,7 +248,7 @@ class UnlockRequestBook(models.Model):
     """Store the selected books in an unlock request"""
     unlock_request = models.ForeignKey(UnlockRequest, on_delete=models.CASCADE, related_name='selected_books_list')
     flipbook = models.ForeignKey(FlipBook, on_delete=models.CASCADE)
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=300)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=500)
     added_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

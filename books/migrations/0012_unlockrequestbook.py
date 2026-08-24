@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             name='UnlockRequestBook',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('price', models.DecimalField(decimal_places=2, default=300, max_digits=10)),
+                ('price', models.DecimalField(decimal_places=2, default=500, max_digits=10)),
                 ('added_at', models.DateTimeField(auto_now_add=True)),
                 ('flipbook', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='books.flipbook')),
                 ('unlock_request', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='selected_books_list', to='books.unlockrequest')),
