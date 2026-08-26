@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.contrib.auth.forms import UserCreationForm
 from .forms import UsernameEmailAuthenticationForm, RegistrationForm
 from django.contrib.auth.models import User
@@ -88,6 +89,7 @@ def logout_other_session(request, session_id):
     return redirect('active_sessions')
 
 
+@ensure_csrf_cookie
 def register_view(request):
     """User registration view"""
     if request.user.is_authenticated:
@@ -113,6 +115,7 @@ def register_view(request):
     return render(request, 'books/register.html', {'form': form})
 
 
+@ensure_csrf_cookie
 def login_view(request):
     """User login view (username, email, and password required)"""
     # Ensure session key exists before checking for existing sessions

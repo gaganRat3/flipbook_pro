@@ -17,8 +17,10 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', '58039ee8d1df.ngrok-free.app', '29e8-
 CSRF_TRUSTED_ORIGINS = ['https://29e8-103-228-147-158.ngrok-free.app', 'https://4482-103-241-224-69.ngrok-free.app', 'https://keyla-mirier-pebbly.ngrok-free.dev','https://bhudevstore.com']
 
 # CSRF cookie settings for production
-CSRF_COOKIE_SECURE = True  # Set to True if using HTTPS in production
+CSRF_COOKIE_SECURE = True   # Only send over HTTPS
 CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_HTTPONLY = False  # Must be False so JavaScript can read it for AJAX requests
+CSRF_COOKIE_AGE = 60 * 60 * 24 * 365  # 1 year — prevents cookie expiry on mobile browsers
 
 # Session configuration for persistent login
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Keep session alive after browser close
