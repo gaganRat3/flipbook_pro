@@ -323,57 +323,120 @@ admin.site.register(FlipBookAccess, FlipBookAccessAdmin)
     # UnlockRequestBookAdmin removed to hide Unlock Request Books section
 
 from django.core.paginator import Paginator
+
 @staff_member_required
 def user_flipbook_access_view(request):
+    from .models import FlipBookAccess
 
-    search_query = request.GET.get('search', '').strip()
+    flipbooks = FlipBook.objects.filter(is_published=True).order_by('title')
+
+    # --- GET params ---
+    search_query   = request.GET.get('search', '').strip()
+    filter_book_id = request.GET.get('filter_book', '').strip()
+
+    # Base queryset: non-staff users
     users_qs = User.objects.filter(is_staff=False, is_superuser=False)
+
+    # Filter by name/email search
     if search_query:
         users_qs = users_qs.filter(
             Q(username__icontains=search_query) | Q(email__icontains=search_query)
         )
+
+    # Filter by book: only users who already have access to selected book
+    filter_book = None
+    if filter_book_id:
+        try:
+            filter_book = FlipBook.objects.get(id=int(filter_book_id))
+            users_with_access = FlipBookAccess.objects.filter(
+                flipbook=filter_book
+            ).values_list('user_id', flat=True)
+            users_qs = users_qs.filter(id__in=users_with_access)
+        except (FlipBook.DoesNotExist, ValueError):
+            filter_book = None
+
     users_qs = users_qs.order_by('username')
-    paginator = Paginator(users_qs, 10)  # 10 users per page
+    paginator = Paginator(users_qs, 10)
     page_number = request.GET.get('page')
     users = paginator.get_page(page_number)
-    flipbooks = FlipBook.objects.all()
-    from .models import FlipBookAccess
+
+    # Build existing access map for current page
     user_flipbook_ids = {}
     for user in users:
-        user_flipbook_ids[user.id] = set(FlipBookAccess.objects.filter(user=user).values_list('flipbook_id', flat=True))
+        user_flipbook_ids[user.id] = set(
+            FlipBookAccess.objects.filter(user=user).values_list('flipbook_id', flat=True)
+        )
 
     if request.method == 'POST':
-        # For POST, update only users on current page to avoid data loss
+        action = request.POST.get('action', '')
+
+        # ── Action 1: Bulk-grant a book to all currently FILTERED users ──
+        if action == 'grant_to_filtered':
+            try:
+                grant_book_id = request.POST.get('grant_book_id')
+                grant_book = FlipBook.objects.get(id=int(grant_book_id))
+
+                # Re-run the same filter (all pages, not just current page)
+                all_filtered_users = User.objects.filter(is_staff=False, is_superuser=False)
+                if search_query:
+                    all_filtered_users = all_filtered_users.filter(
+                        Q(username__icontains=search_query) | Q(email__icontains=search_query)
+                    )
+                if filter_book:
+                    uids = FlipBookAccess.objects.filter(
+                        flipbook=filter_book
+                    ).values_list('user_id', flat=True)
+                    all_filtered_users = all_filtered_users.filter(id__in=uids)
+
+                granted_count = 0
+                for u in all_filtered_users:
+                    _, created = FlipBookAccess.objects.get_or_create(user=u, flipbook=grant_book)
+                    if created:
+                        granted_count += 1
+
+                messages.success(
+                    request,
+                    f"✅ Granted '{grant_book.title}' to {all_filtered_users.count()} user(s). "
+                    f"({granted_count} new, {all_filtered_users.count() - granted_count} already had access)"
+                )
+            except (FlipBook.DoesNotExist, ValueError, TypeError) as e:
+                messages.error(request, f"❌ Error: {e}")
+            # Preserve GET filters on redirect
+            from urllib.parse import urlencode
+            qs = urlencode({k: v for k, v in {
+                'filter_book': filter_book_id,
+                'search': search_query,
+            }.items() if v})
+            return redirect(f"{request.path}?{qs}" if qs else request.path)
+
+        # ── Action 2: Per-user checkbox updates (existing behaviour) ──
         try:
             for user in users:
                 selected = set()
-                flipbook_ids = request.POST.getlist(f'flipbooks_{user.id}')
-                for fb_id in flipbook_ids:
+                for fb_id in request.POST.getlist(f'flipbooks_{user.id}'):
                     try:
                         selected.add(int(fb_id))
                     except (ValueError, TypeError):
                         continue
-                
+
                 current = set(FlipBookAccess.objects.filter(user=user).values_list('flipbook_id', flat=True))
-                
-                # Add new access
+
                 for fb_id in selected - current:
                     try:
                         FlipBookAccess.objects.get_or_create(user=user, flipbook_id=fb_id)
                     except Exception as e:
                         print(f"Error creating access for user {user.id}, flipbook {fb_id}: {e}")
-                
-                # Remove access
+
                 for fb_id in current - selected:
                     try:
                         FlipBookAccess.objects.filter(user=user, flipbook_id=fb_id).delete()
                     except Exception as e:
                         print(f"Error deleting access for user {user.id}, flipbook {fb_id}: {e}")
-            
-            messages.success(request, f"✅ FlipBook access updated successfully for {len(users)} user(s).")
+
+            messages.success(request, f"✅ FlipBook access updated for {len(users)} user(s).")
         except Exception as e:
             messages.error(request, f"❌ Error updating access: {str(e)}")
-        
+
         return redirect(request.path)
 
     context = {
@@ -383,6 +446,8 @@ def user_flipbook_access_view(request):
         'paginator': paginator,
         'page_obj': users,
         'search_query': search_query,
+        'filter_book': filter_book,
+        'filter_book_id': filter_book_id,
     }
     return render(request, 'admin/user_flipbook_access.html', context)
 
