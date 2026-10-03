@@ -243,7 +243,7 @@ class UnlockRequestBook(models.Model):
     """Store the selected books in an unlock request"""
     unlock_request = models.ForeignKey(UnlockRequest, on_delete=models.CASCADE, related_name='selected_books_list')
     flipbook = models.ForeignKey(FlipBook, on_delete=models.CASCADE)
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=500)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=300)
     added_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

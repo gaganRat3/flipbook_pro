@@ -41,7 +41,6 @@ class UnlockRequestAdmin(admin.ModelAdmin):
             )
         return '-'
     payment_screenshot_thumb.short_description = 'Screenshot'
-    payment_screenshot_thumb.allow_tags = True
 
     def selected_books_titles(self, obj):
         books = obj.selected_books_list.all()
@@ -83,7 +82,6 @@ class UnlockRequestAdmin(admin.ModelAdmin):
             )
         return 'No screenshot uploaded'
     payment_screenshot_preview.short_description = 'Payment Screenshot Preview'
-    payment_screenshot_preview.allow_tags = True
     
     # Custom Actions for Status Update
     def mark_as_pending(self, request, queryset):
@@ -153,9 +151,8 @@ class EventAdmin(admin.ModelAdmin):
     )
     
     def color_preview(self, obj):
-        return f'<div style="width: 50px; height: 50px; background-color: {obj.color}; border-radius: 8px; border: 2px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></div>'
+        return format_html('<div style="width: 50px; height: 50px; background-color: {}; border-radius: 8px; border: 2px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></div>', obj.color)
     color_preview.short_description = 'Color Preview'
-    color_preview.allow_tags = True
 
     def book_count(self, obj):
         count = obj.flipbooks.count()
@@ -208,10 +205,9 @@ class FlipBookAdmin(admin.ModelAdmin):
 
     def thumbnail_preview(self, obj):
         if obj.thumbnail:
-            return f'<img src="{obj.thumbnail.url}" style="max-width: 200px; max-height: 200px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />'
-        return '<span style="color: #999;">No thumbnail</span>'
+            return format_html('<img src="{}" style="max-width: 200px; max-height: 200px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />', obj.thumbnail.url)
+        return format_html('<span style="color: #999;">No thumbnail</span>')
     thumbnail_preview.short_description = 'Thumbnail Preview'
-    thumbnail_preview.allow_tags = True
 
     def save_model(self, request, obj, form, change):
         if not change:  # If creating new object
@@ -284,10 +280,9 @@ class FlipBookAccessAdmin(admin.ModelAdmin):
 
     def user_status(self, obj):
         if obj.user.is_active:
-            return '<span style="color: green; font-weight: bold;">Active</span>'
-        return '<span style="color: red; font-weight: bold;">Inactive</span>'
+            return format_html('<span style="color: green; font-weight: bold;">Active</span>')
+        return format_html('<span style="color: red; font-weight: bold;">Inactive</span>')
     user_status.short_description = 'Status'
-    user_status.allow_tags = True
 
     def user_info(self, obj):
         user = obj.user
@@ -304,7 +299,6 @@ class FlipBookAccessAdmin(admin.ModelAdmin):
         """
         return info
     user_info.short_description = 'User Information'
-    user_info.allow_tags = True
 
     def show_user_details(self, request, queryset):
         self.message_user(request, f"Showing details for {queryset.count()} user(s)")
